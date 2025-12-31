@@ -276,6 +276,15 @@ const TokensPage = () => {
         )}
       </div>
 
+      {/* Pagination - Always visible */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalItems={filteredTokens.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+      />
+
       {/* Tokens List */}
       {paginatedTokens.length > 0 ? (
         <>
@@ -376,15 +385,6 @@ const TokensPage = () => {
               );
             })}
           </div>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalItems={filteredTokens.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
         </>
       ) : (
         <div className="card-cyber p-12 text-center">

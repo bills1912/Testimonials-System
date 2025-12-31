@@ -5,6 +5,9 @@ import { publicAPI } from '../../utils/api';
 import TestimonialCard from '../../components/ui/TestimonialCard';
 import CyberSelect from '../../components/ui/CyberSelect';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+import Pagination from '../../components/ui/Pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 const TestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -13,6 +16,7 @@ const TestimonialsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState(0);
   const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const ratingOptions = [
     { value: 0, label: 'All Ratings' },
@@ -83,6 +87,22 @@ const TestimonialsPage = () => {
 
     setFilteredTestimonials(filtered);
   }, [testimonials, searchQuery, ratingFilter, sortBy]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, ratingFilter, sortBy]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredTestimonials.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedTestimonials = filteredTestimonials.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top of testimonials section
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -183,18 +203,29 @@ const TestimonialsPage = () => {
           )}
         </div>
 
+        {/* Pagination - Always visible */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={filteredTestimonials.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+        />
+
         {/* Testimonials grid */}
-        {filteredTestimonials.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTestimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={testimonial.id}
-                testimonial={testimonial}
-                featured={testimonial.is_featured}
-                delay={index * 0.05}
-              />
-            ))}
-          </div>
+        {paginatedTestimonials.length > 0 ? (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedTestimonials.map((testimonial, index) => (
+                <TestimonialCard
+                  key={testimonial.id}
+                  testimonial={testimonial}
+                  featured={testimonial.is_featured}
+                  delay={index * 0.05}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}

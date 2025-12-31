@@ -295,6 +295,15 @@ const AdminTestimonialsPage = () => {
         )}
       </div>
 
+      {/* Pagination - Always visible */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalItems={filteredTestimonials.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+      />
+
       {/* Testimonials List */}
       {paginatedTestimonials.length > 0 ? (
         <>
@@ -402,15 +411,6 @@ const AdminTestimonialsPage = () => {
               </motion.div>
             ))}
           </div>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalItems={filteredTestimonials.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
         </>
       ) : (
         <motion.div

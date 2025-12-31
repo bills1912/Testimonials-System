@@ -291,6 +291,15 @@ const ProjectsPage = () => {
         )}
       </div>
 
+      {/* Pagination - Always visible */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalItems={filteredProjects.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+      />
+
       {/* Projects Grid */}
       {paginatedProjects.length > 0 ? (
         <>
@@ -408,15 +417,6 @@ const ProjectsPage = () => {
               </motion.div>
             ))}
           </div>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalItems={filteredProjects.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
         </>
       ) : (
         <div className="card-cyber p-12 text-center">
