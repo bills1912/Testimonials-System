@@ -282,9 +282,6 @@ const AdminTestimonialsPage = () => {
 
       {/* Results count */}
       <div className="flex items-center justify-between">
-        <p className="text-void-400">
-          Menampilkan <span className="text-white font-medium">{filteredTestimonials.length}</span> testimoni
-        </p>
         {hasActiveFilters && (
           <button
             onClick={clearFilters}

@@ -187,9 +187,6 @@ const TestimonialsPage = () => {
 
         {/* Results count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-void-400">
-            Showing <span className="text-white font-medium">{filteredTestimonials.length}</span> testimonials
-          </p>
           {(searchQuery || ratingFilter > 0) && (
             <button
               onClick={() => {
@@ -204,13 +201,15 @@ const TestimonialsPage = () => {
         </div>
 
         {/* Pagination - Always visible */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          totalItems={filteredTestimonials.length}
-          itemsPerPage={ITEMS_PER_PAGE}
-        />
+        <div className='mb-6'>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            totalItems={filteredTestimonials.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
+        </div>
 
         {/* Testimonials grid */}
         {paginatedTestimonials.length > 0 ? (

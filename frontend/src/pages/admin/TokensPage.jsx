@@ -260,9 +260,6 @@ const TokensPage = () => {
 
       {/* Results count */}
       <div className="flex items-center justify-between">
-        <p className="text-void-400">
-          Menampilkan <span className="text-white font-medium">{filteredTokens.length}</span> token
-        </p>
         {(searchQuery || statusFilter !== 'all') && (
           <button
             onClick={() => {

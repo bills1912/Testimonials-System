@@ -278,9 +278,6 @@ const ProjectsPage = () => {
 
       {/* Results count */}
       <div className="flex items-center justify-between">
-        <p className="text-void-400">
-          Menampilkan <span className="text-white font-medium">{filteredProjects.length}</span> proyek
-        </p>
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
