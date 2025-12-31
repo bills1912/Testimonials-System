@@ -13,12 +13,31 @@ import {
   Search,
   Filter,
   Loader2,
-  Send
+  Send,
+  FolderKanban
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { tokenAPI, adminAPI } from '../../utils/api';
+import { tokenAPI, adminAPI, parseErrorMessage } from '../../utils/api';
 import Modal from '../../components/ui/Modal';
+import CyberSelect from '../../components/ui/CyberSelect';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+
+const tokenStatusOptions = [
+  { value: 'all', label: 'All Status' },
+  { value: 'active', label: 'Active' },
+  { value: 'used', label: 'Used' },
+  { value: 'expired', label: 'Expired' },
+  { value: 'revoked', label: 'Revoked' }
+];
+
+const expiryOptions = [
+  { value: 24, label: '24 Hours' },
+  { value: 48, label: '48 Hours' },
+  { value: 72, label: '72 Hours (3 Days)' },
+  { value: 168, label: '1 Week' },
+  { value: 336, label: '2 Weeks' },
+  { value: 720, label: '1 Month' }
+];
 
 const TokensPage = () => {
   const [tokens, setTokens] = useState([]);
@@ -85,7 +104,7 @@ const TokensPage = () => {
       await navigator.clipboard.writeText(response.data.invite_url);
       toast.success('Link sudah disalin ke clipboard!');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal membuat token');
+      toast.error(parseErrorMessage(error, 'Gagal membuat token'));
     } finally {
       setGenerating(false);
     }
@@ -101,7 +120,7 @@ const TokensPage = () => {
       setShowRevokeModal(false);
       setSelectedToken(null);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal mencabut token');
+      toast.error(parseErrorMessage(error, 'Gagal mencabut token'));
     }
   };
 
@@ -197,29 +216,24 @@ const TokensPage = () => {
       <div className="card-cyber p-4">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+            <div className="input-icon-left">
+              <Search className="w-5 h-5 text-void-500" />
+            </div>
             <input
               type="text"
               placeholder="Cari token atau proyek..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-cyber pl-12"
+              className="input-cyber input-with-icon-left"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-void-500" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-cyber w-40"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="used">Used</option>
-              <option value="expired">Expired</option>
-              <option value="revoked">Revoked</option>
-            </select>
-          </div>
+          <CyberSelect
+            options={tokenStatusOptions}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            icon={Filter}
+            className="w-44"
+          />
         </div>
       </div>
 
@@ -360,37 +374,27 @@ const TokensPage = () => {
             <label className="block text-sm font-medium text-void-300 mb-2">
               Select Project *
             </label>
-            <select
+            <CyberSelect
+              options={[
+                { value: '', label: '-- Pilih Proyek --' },
+                ...projects.map(p => ({ value: p.id, label: `${p.name} (${p.client_name})` }))
+              ]}
               value={formData.project_id}
-              onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
-              className="input-cyber"
-              required
-            >
-              <option value="">-- Pilih Proyek --</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name} ({project.client_name})
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setFormData({ ...formData, project_id: value })}
+              icon={FolderKanban}
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-void-300 mb-2">
               Valid For
             </label>
-            <select
+            <CyberSelect
+              options={expiryOptions}
               value={formData.expires_hours}
-              onChange={(e) => setFormData({ ...formData, expires_hours: Number(e.target.value) })}
-              className="input-cyber"
-            >
-              <option value={24}>24 Hours</option>
-              <option value={48}>48 Hours</option>
-              <option value={72}>72 Hours (3 Days)</option>
-              <option value={168}>1 Week</option>
-              <option value={336}>2 Weeks</option>
-              <option value={720}>1 Month</option>
-            </select>
+              onChange={(value) => setFormData({ ...formData, expires_hours: Number(value) })}
+              icon={Clock}
+            />
           </div>
 
           <div>

@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { 
   Sparkles, 
   MessageSquare, 
@@ -10,24 +11,40 @@ import {
   Linkedin
 } from 'lucide-react';
 import clsx from 'clsx';
+import useThemeStore from '../../context/themeStore';
+import ThemeSwitch from '../ui/ThemeSwitch';
 
 const PublicLayout = () => {
   const location = useLocation();
+  const { initTheme, resolvedTheme } = useThemeStore();
+  
+  // Initialize theme on mount
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
   
   const navLinks = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/testimonials', label: 'Testimonials', icon: MessageSquare },
   ];
 
+  const isLightMode = resolvedTheme === 'light';
+
   return (
-    <div className="min-h-screen bg-void-950 flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
       {/* Background effects */}
-      <div className="fixed inset-0 bg-grid opacity-20 pointer-events-none" />
-      <div className="fixed top-0 left-0 w-[600px] h-[600px] orb orb-cyan opacity-30 pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] orb orb-purple opacity-30 pointer-events-none" />
+      <div className="fixed inset-0 bg-grid pointer-events-none" />
+      <div className="fixed top-0 left-0 w-[600px] h-[600px] orb orb-cyan pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] orb orb-purple pointer-events-none" />
       
       {/* Navigation */}
-      <nav className="relative z-50 border-b border-void-800/50">
+      <nav 
+        className="relative z-50"
+        style={{ borderBottom: `1px solid var(--border-primary)` }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -37,9 +54,12 @@ const PublicLayout = () => {
                 whileHover={{ rotate: 180 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan to-neon-purple rounded-lg opacity-80" />
-                <div className="absolute inset-[2px] bg-void-950 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-neon-cyan" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg opacity-80" />
+                <div 
+                  className="absolute inset-[2px] rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--bg-primary)' }}
+                >
+                  <Sparkles className="w-5 h-5" style={{ color: 'var(--accent-cyan)' }} />
                 </div>
               </motion.div>
               <span className="font-display font-bold text-xl tracking-wider text-gradient hidden sm:block">
@@ -49,26 +69,38 @@ const PublicLayout = () => {
             
             {/* Nav Links */}
             <div className="flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={clsx(
-                    'flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300',
-                    location.pathname === link.path
-                      ? 'bg-neon-cyan/10 text-neon-cyan'
-                      : 'text-void-300 hover:text-white hover:bg-void-800/50'
-                  )}
-                >
-                  <link.icon className="w-4 h-4" />
-                  <span className="font-medium hidden sm:block">{link.label}</span>
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300"
+                    style={{
+                      backgroundColor: isActive 
+                        ? (isLightMode ? 'rgba(8,145,178,0.1)' : 'rgba(0,240,255,0.1)')
+                        : 'transparent',
+                      color: isActive ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
+                    }}
+                  >
+                    <link.icon className="w-4 h-4" />
+                    <span className="font-medium hidden sm:block">{link.label}</span>
+                  </Link>
+                );
+              })}
+              
+              {/* Theme Switch */}
+              <ThemeSwitch className="ml-2" />
               
               {/* Admin Link */}
               <Link
                 to="/admin"
-                className="ml-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-void-800/50 text-void-300 hover:text-neon-purple hover:bg-void-700/50 transition-all duration-300 border border-void-700/50"
+                className="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300"
+                style={{
+                  backgroundColor: isLightMode ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid var(--border-primary)`,
+                  color: 'var(--text-tertiary)',
+                }}
               >
                 <Shield className="w-4 h-4" />
                 <span className="font-medium hidden sm:block">Admin</span>
@@ -84,13 +116,16 @@ const PublicLayout = () => {
       </main>
       
       {/* Footer */}
-      <footer className="relative border-t border-void-800/50 py-8">
+      <footer 
+        className="relative py-8"
+        style={{ borderTop: `1px solid var(--border-primary)` }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Copyright */}
             <div className="flex items-center gap-3">
-              <Sparkles className="w-5 h-5 text-neon-cyan" />
-              <span className="text-void-400 text-sm">
+              <Sparkles className="w-5 h-5" style={{ color: 'var(--accent-cyan)' }} />
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 © {new Date().getFullYear()} Testimonial System. All rights reserved.
               </span>
             </div>
@@ -99,19 +134,22 @@ const PublicLayout = () => {
             <div className="flex items-center gap-4">
               <a
                 href="#"
-                className="p-2 rounded-lg text-void-500 hover:text-neon-cyan hover:bg-void-800/50 transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--text-muted)' }}
               >
                 <Github className="w-5 h-5" />
               </a>
               <a
                 href="#"
-                className="p-2 rounded-lg text-void-500 hover:text-neon-cyan hover:bg-void-800/50 transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--text-muted)' }}
               >
                 <Twitter className="w-5 h-5" />
               </a>
               <a
                 href="#"
-                className="p-2 rounded-lg text-void-500 hover:text-neon-cyan hover:bg-void-800/50 transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--text-muted)' }}
               >
                 <Linkedin className="w-5 h-5" />
               </a>

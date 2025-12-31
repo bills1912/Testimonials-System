@@ -13,13 +13,29 @@ import {
   Calendar,
   User,
   Building2,
-  Loader2
+  Loader2,
+  SlidersHorizontal
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { adminAPI } from '../../utils/api';
+import { adminAPI, parseErrorMessage } from '../../utils/api';
 import Modal from '../../components/ui/Modal';
+import CyberSelect from '../../components/ui/CyberSelect';
 import StarRating from '../../components/ui/StarRating';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+
+const ratingFilterOptions = [
+  { value: 0, label: 'All Ratings' },
+  { value: 5, label: '5 Stars' },
+  { value: 4, label: '4+ Stars' },
+  { value: 3, label: '3+ Stars' }
+];
+
+const statusFilterOptions = [
+  { value: 'all', label: 'All Status' },
+  { value: 'featured', label: 'Featured' },
+  { value: 'published', label: 'Published' },
+  { value: 'unpublished', label: 'Unpublished' }
+];
 
 const TestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -70,7 +86,7 @@ const TestimonialsPage = () => {
       ));
       toast.success(response.data.is_featured ? 'Marked as featured' : 'Removed from featured');
     } catch (error) {
-      toast.error('Gagal mengubah status featured');
+      toast.error(parseErrorMessage(error, 'Gagal mengubah status featured'));
     }
   };
 
@@ -82,7 +98,7 @@ const TestimonialsPage = () => {
       ));
       toast.success(response.data.is_published ? 'Published' : 'Unpublished');
     } catch (error) {
-      toast.error('Gagal mengubah status publish');
+      toast.error(parseErrorMessage(error, 'Gagal mengubah status publish'));
     }
   };
 
@@ -95,7 +111,7 @@ const TestimonialsPage = () => {
       setShowDeleteModal(false);
       setSelectedTestimonial(null);
     } catch (error) {
-      toast.error('Gagal menghapus testimoni');
+      toast.error(parseErrorMessage(error, 'Gagal menghapus testimoni'));
     } finally {
       setDeleting(false);
     }
@@ -157,44 +173,34 @@ const TestimonialsPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="card-cyber p-4">
+      <div className="card-cyber p-4 relative" style={{ zIndex: 100 }}>
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+            <div className="input-icon-left">
+              <Search className="w-5 h-5 text-void-500" />
+            </div>
             <input
               type="text"
               placeholder="Cari testimoni..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-cyber pl-12"
+              className="input-cyber input-with-icon-left"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-void-500" />
-            <select
-              value={ratingFilter}
-              onChange={(e) => setRatingFilter(Number(e.target.value))}
-              className="input-cyber w-36"
-            >
-              <option value={0}>All Ratings</option>
-              <option value={5}>5 Stars</option>
-              <option value={4}>4+ Stars</option>
-              <option value={3}>3+ Stars</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-void-500" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-cyber w-36"
-            >
-              <option value="all">All Status</option>
-              <option value="featured">Featured</option>
-              <option value="published">Published</option>
-              <option value="unpublished">Unpublished</option>
-            </select>
-          </div>
+          <CyberSelect
+            options={ratingFilterOptions}
+            value={ratingFilter}
+            onChange={(value) => setRatingFilter(Number(value))}
+            icon={Star}
+            className="w-full lg:w-44"
+          />
+          <CyberSelect
+            options={statusFilterOptions}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            icon={SlidersHorizontal}
+            className="w-full lg:w-44"
+          />
         </div>
       </div>
 

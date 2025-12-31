@@ -1,0 +1,14 @@
+# Render Configuration for Frontend (Static Site)
+# This file configures deployment on Render.com
+
+# Note: For static sites on Render, you need to configure via Dashboard
+# This file is for reference
+
+# Dashboard Settings:
+# - Name: testimonial-frontend (or your choice)
+# - Root Directory: frontend
+# - Build Command: npm install && npm run build
+# - Publish Directory: dist
+
+# Environment Variables to set in Render Dashboard:
+# VITE_API_URL=https://your-backend-name.onrender.com/api

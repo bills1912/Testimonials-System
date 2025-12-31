@@ -260,7 +260,7 @@ const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 pt-6">
             {[
               {
                 step: '01',
@@ -284,12 +284,15 @@ const HomePage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
-                className="relative card-cyber p-8 text-center group"
+                className="relative bg-void-900/80 backdrop-blur-xl border border-void-700/50 rounded-2xl p-8 text-center group transition-all duration-500 hover:border-neon-cyan/30 hover:shadow-[0_0_40px_rgba(0,240,255,0.1)]"
               >
-                {/* Step number */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center">
-                    <span className="font-display font-bold text-xs text-void-950">
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-neon-cyan/5 via-transparent to-neon-purple/5 pointer-events-none" />
+                
+                {/* Step number - positioned outside card */}
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-10">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center shadow-lg shadow-neon-cyan/30">
+                    <span className="font-display font-bold text-sm text-void-950">
                       {item.step}
                     </span>
                   </div>
@@ -297,13 +300,13 @@ const HomePage = () => {
 
                 {/* Connector line */}
                 {index < 2 && (
-                  <div className="hidden md:block absolute top-4 left-full w-full h-px bg-gradient-to-r from-neon-cyan/30 to-transparent" />
+                  <div className="hidden md:block absolute top-5 left-full w-full h-px bg-gradient-to-r from-neon-cyan/30 to-transparent z-0" />
                 )}
 
-                <h3 className="font-display font-bold text-xl text-white mt-4 mb-3">
+                <h3 className="font-display font-bold text-xl text-white mt-6 mb-3 relative">
                   {item.title}
                 </h3>
-                <p className="text-void-400">{item.description}</p>
+                <p className="text-void-400 relative">{item.description}</p>
               </motion.div>
             ))}
           </div>

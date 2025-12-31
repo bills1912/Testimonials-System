@@ -15,12 +15,20 @@ import {
   Key,
   Calendar,
   Tag,
-  Loader2
+  Loader2,
+  Activity
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { adminAPI } from '../../utils/api';
+import { adminAPI, parseErrorMessage } from '../../utils/api';
 import Modal from '../../components/ui/Modal';
+import CyberSelect from '../../components/ui/CyberSelect';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'archived', label: 'Archived' }
+];
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
@@ -79,20 +87,41 @@ const ProjectsPage = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error('Project Name harus diisi');
+      return;
+    }
+    if (!formData.client_name.trim()) {
+      toast.error('Client Name harus diisi');
+      return;
+    }
+    
     setSubmitting(true);
     
     try {
       const data = {
-        ...formData,
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : []
+        name: formData.name.trim(),
+        description: formData.description.trim() || null,
+        client_name: formData.client_name.trim(),
+        client_email: formData.client_email.trim() || null, // Send null instead of empty string
+        client_company: formData.client_company.trim() || null,
+        project_url: formData.project_url.trim() || null,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+        status: formData.status
       };
+      
+      console.log('Sending project data:', data);
+      
       await adminAPI.createProject(data);
       toast.success('Proyek berhasil dibuat!');
       setShowCreateModal(false);
       resetForm();
       fetchProjects();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal membuat proyek');
+      console.error('Create project error:', error.response?.data);
+      toast.error(parseErrorMessage(error, 'Gagal membuat proyek'));
     } finally {
       setSubmitting(false);
     }
@@ -100,13 +129,31 @@ const ProjectsPage = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error('Project Name harus diisi');
+      return;
+    }
+    if (!formData.client_name.trim()) {
+      toast.error('Client Name harus diisi');
+      return;
+    }
+    
     setSubmitting(true);
     
     try {
       const data = {
-        ...formData,
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : []
+        name: formData.name.trim(),
+        description: formData.description.trim() || null,
+        client_name: formData.client_name.trim(),
+        client_email: formData.client_email.trim() || null,
+        client_company: formData.client_company.trim() || null,
+        project_url: formData.project_url.trim() || null,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+        status: formData.status
       };
+      
       await adminAPI.updateProject(selectedProject.id, data);
       toast.success('Proyek berhasil diperbarui!');
       setShowEditModal(false);
@@ -114,7 +161,8 @@ const ProjectsPage = () => {
       resetForm();
       fetchProjects();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal memperbarui proyek');
+      console.error('Update project error:', error.response?.data);
+      toast.error(parseErrorMessage(error, 'Gagal memperbarui proyek'));
     } finally {
       setSubmitting(false);
     }
@@ -129,7 +177,7 @@ const ProjectsPage = () => {
       setSelectedProject(null);
       fetchProjects();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal menghapus proyek');
+      toast.error(parseErrorMessage(error, 'Gagal menghapus proyek'));
     } finally {
       setSubmitting(false);
     }
@@ -190,13 +238,15 @@ const ProjectsPage = () => {
       {/* Search */}
       <div className="card-cyber p-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+          <div className="input-icon-left">
+            <Search className="w-5 h-5 text-void-500" />
+          </div>
           <input
             type="text"
             placeholder="Cari proyek atau klien..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-cyber pl-12"
+            className="input-cyber input-with-icon-left"
           />
         </div>
       </div>
@@ -447,15 +497,12 @@ const ProjectsPage = () => {
             <label className="block text-sm font-medium text-void-300 mb-2">
               Status
             </label>
-            <select
+            <CyberSelect
+              options={statusOptions}
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="input-cyber"
-            >
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-              <option value="archived">Archived</option>
-            </select>
+              onChange={(value) => setFormData({ ...formData, status: value })}
+              icon={Activity}
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -582,15 +629,12 @@ const ProjectsPage = () => {
             <label className="block text-sm font-medium text-void-300 mb-2">
               Status
             </label>
-            <select
+            <CyberSelect
+              options={statusOptions}
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="input-cyber"
-            >
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-              <option value="archived">Archived</option>
-            </select>
+              onChange={(value) => setFormData({ ...formData, status: value })}
+              icon={Activity}
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

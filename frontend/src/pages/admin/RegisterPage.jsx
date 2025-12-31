@@ -164,14 +164,16 @@ const RegisterPage = () => {
             <div>
               <label className="block text-sm font-medium text-void-300 mb-2">Nama Lengkap</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <User className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type="text"
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
                   placeholder="John Doe"
-                  className={`input-cyber pl-12 ${errors.full_name ? 'input-error' : ''}`}
+                  className={`input-cyber input-with-icon-left ${errors.full_name ? 'input-error' : ''}`}
                 />
               </div>
               {errors.full_name && <p className="mt-1 text-sm text-red-400">{errors.full_name}</p>}
@@ -180,14 +182,16 @@ const RegisterPage = () => {
             <div>
               <label className="block text-sm font-medium text-void-300 mb-2">Username</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <User className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="johndoe"
-                  className={`input-cyber pl-12 ${errors.username ? 'input-error' : ''}`}
+                  className={`input-cyber input-with-icon-left ${errors.username ? 'input-error' : ''}`}
                   autoComplete="username"
                 />
               </div>
@@ -197,14 +201,16 @@ const RegisterPage = () => {
             <div>
               <label className="block text-sm font-medium text-void-300 mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <Mail className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="john@example.com"
-                  className={`input-cyber pl-12 ${errors.email ? 'input-error' : ''}`}
+                  className={`input-cyber input-with-icon-left ${errors.email ? 'input-error' : ''}`}
                   autoComplete="email"
                 />
               </div>
@@ -214,20 +220,22 @@ const RegisterPage = () => {
             <div>
               <label className="block text-sm font-medium text-void-300 mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <Lock className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className={`input-cyber pl-12 pr-12 ${errors.password ? 'input-error' : ''}`}
+                  className={`input-cyber input-with-icon-left input-with-icon-right ${errors.password ? 'input-error' : ''}`}
                   autoComplete="new-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-void-500 hover:text-void-300 transition-colors"
+                  className="input-icon-right text-void-500 hover:text-void-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -256,18 +264,22 @@ const RegisterPage = () => {
             <div>
               <label className="block text-sm font-medium text-void-300 mb-2">Konfirmasi Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <Lock className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className={`input-cyber pl-12 ${errors.confirmPassword ? 'input-error' : ''}`}
+                  className={`input-cyber input-with-icon-left ${errors.confirmPassword ? 'input-error' : ''}`}
                   autoComplete="new-password"
                 />
                 {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                  <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                  <div className="input-icon-right">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                  </div>
                 )}
               </div>
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-400">{errors.confirmPassword}</p>}

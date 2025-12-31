@@ -43,14 +43,16 @@ const DashboardPage = () => {
       label: 'Total Projects',
       value: stats?.total_projects || 0,
       icon: FolderKanban,
-      color: 'cyan',
+      gradient: 'linear-gradient(135deg, rgba(0,240,255,0.15), transparent)',
+      iconColor: 'var(--accent-cyan)',
       link: '/admin/projects'
     },
     {
       label: 'Total Testimonials',
       value: stats?.total_testimonials || 0,
       icon: MessageSquareQuote,
-      color: 'purple',
+      gradient: 'linear-gradient(135deg, rgba(157,0,255,0.15), transparent)',
+      iconColor: 'var(--accent-purple)',
       link: '/admin/testimonials'
     },
     {
@@ -58,196 +60,121 @@ const DashboardPage = () => {
       value: stats?.active_tokens || 0,
       subValue: `/ ${stats?.total_tokens || 0} total`,
       icon: Key,
-      color: 'green',
+      gradient: 'linear-gradient(135deg, rgba(34,197,94,0.15), transparent)',
+      iconColor: '#22c55e',
       link: '/admin/tokens'
     },
     {
       label: 'Average Rating',
       value: stats?.average_rating?.toFixed(1) || '5.0',
       icon: Star,
-      color: 'yellow'
+      gradient: 'linear-gradient(135deg, rgba(245,158,11,0.15), transparent)',
+      iconColor: 'var(--accent-yellow)'
     }
   ];
 
-  const colorClasses = {
-    cyan: {
-      bg: 'from-neon-cyan/10 to-transparent',
-      border: 'border-neon-cyan/20',
-      icon: 'text-neon-cyan',
-      hover: 'hover:border-neon-cyan/40'
+  const quickActions = [
+    {
+      label: 'Add a new project',
+      desc: 'Start by creating a new project to organize your client testimonials.',
+      link: '/admin/projects',
+      linkText: 'Get Started',
+      icon: FolderKanban,
+      gradient: 'linear-gradient(135deg, rgba(0,240,255,0.1), transparent)',
     },
-    purple: {
-      bg: 'from-neon-purple/10 to-transparent',
-      border: 'border-neon-purple/20',
-      icon: 'text-neon-purple',
-      hover: 'hover:border-neon-purple/40'
+    {
+      label: 'Create invite links',
+      desc: 'Generate unique invite links to send to your clients for testimonials.',
+      link: '/admin/tokens',
+      linkText: 'Generate Token',
+      icon: Key,
+      gradient: 'linear-gradient(135deg, rgba(34,197,94,0.1), transparent)',
     },
-    green: {
-      bg: 'from-neon-green/10 to-transparent',
-      border: 'border-neon-green/20',
-      icon: 'text-neon-green',
-      hover: 'hover:border-neon-green/40'
-    },
-    yellow: {
-      bg: 'from-neon-yellow/10 to-transparent',
-      border: 'border-neon-yellow/20',
-      icon: 'text-neon-yellow',
-      hover: 'hover:border-neon-yellow/40'
+    {
+      label: 'View all testimonials',
+      desc: 'View, edit, and manage all client testimonials in one place.',
+      link: '/admin/testimonials',
+      linkText: 'View All',
+      icon: MessageSquareQuote,
+      gradient: 'linear-gradient(135deg, rgba(157,0,255,0.1), transparent)',
     }
-  };
+  ];
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-display font-bold text-2xl lg:text-3xl text-white mb-2">
-            Dashboard
+          <h1 className="text-2xl font-display font-bold" style={{ color: 'var(--text-primary)' }}>
+            Selamat datang!
           </h1>
-          <p className="text-void-400">
-            Selamat datang! Berikut ringkasan statistik Anda.
-          </p>
+          <p style={{ color: 'var(--text-muted)' }}>Berikut ringkasan statistik Anda.</p>
         </div>
-        <Link to="/admin/projects" className="btn-primary inline-flex items-center gap-2">
+        <Link to="/admin/projects" className="btn-primary flex items-center gap-2 w-fit">
           <Plus className="w-4 h-4" />
           New Project
         </Link>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        {statCards.map((stat, index) => {
-          const colors = colorClasses[stat.color];
-          const CardWrapper = stat.link ? Link : 'div';
-          
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <CardWrapper
-                to={stat.link}
-                className={`block card-cyber p-6 bg-gradient-to-br ${colors.bg} ${colors.border} ${stat.link ? colors.hover : ''} transition-all duration-300`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-2 rounded-lg bg-void-800/50 ${colors.icon}`}>
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                  {stat.link && (
-                    <ArrowRight className="w-4 h-4 text-void-500" />
-                  )}
-                </div>
-                <div className="font-display font-bold text-3xl text-white mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-void-400">
-                  {stat.label}
-                  {stat.subValue && (
-                    <span className="text-void-500 ml-1">{stat.subValue}</span>
-                  )}
-                </div>
-              </CardWrapper>
-            </motion.div>
-          );
-        })}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((card, index) => (
+          <motion.div
+            key={card.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            {card.link ? (
+              <Link to={card.link} className="block h-full">
+                <StatCard card={card} />
+              </Link>
+            ) : (
+              <StatCard card={card} />
+            )}
+          </motion.div>
+        ))}
       </div>
 
       {/* Quick Actions */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Create Project Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Link
-            to="/admin/projects"
-            className="block card-cyber p-6 h-full group hover:border-neon-cyan/30 transition-all duration-300"
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {quickActions.map((action, index) => (
+          <motion.div
+            key={action.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + index * 0.1 }}
+            className="rounded-2xl p-6 transition-all duration-300"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-primary)',
+              background: action.gradient,
+            }}
           >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <FolderKanban className="w-6 h-6 text-neon-cyan" />
-              </div>
-              <div>
-                <h3 className="font-display font-bold text-lg text-white">
-                  Create Project
-                </h3>
-                <p className="text-sm text-void-400">Add a new project</p>
-              </div>
+            <div 
+              className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+              style={{ 
+                backgroundColor: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-primary)'
+              }}
+            >
+              <action.icon className="w-6 h-6" style={{ color: 'var(--accent-cyan)' }} />
             </div>
-            <p className="text-void-400 text-sm mb-4">
-              Start by creating a new project to organize your client testimonials.
+            <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              {action.label}
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+              {action.desc}
             </p>
-            <div className="flex items-center gap-2 text-neon-cyan text-sm font-medium">
-              <span>Get Started</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* Generate Token Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Link
-            to="/admin/tokens"
-            className="block card-cyber p-6 h-full group hover:border-neon-green/30 transition-all duration-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-green/20 to-neon-cyan/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Key className="w-6 h-6 text-neon-green" />
-              </div>
-              <div>
-                <h3 className="font-display font-bold text-lg text-white">
-                  Generate Invite
-                </h3>
-                <p className="text-sm text-void-400">Create invite links</p>
-              </div>
-            </div>
-            <p className="text-void-400 text-sm mb-4">
-              Generate unique invite links to send to your clients for testimonials.
-            </p>
-            <div className="flex items-center gap-2 text-neon-green text-sm font-medium">
-              <span>Generate Token</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* View Testimonials Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Link
-            to="/admin/testimonials"
-            className="block card-cyber p-6 h-full group hover:border-neon-purple/30 transition-all duration-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-purple/20 to-neon-magenta/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MessageSquareQuote className="w-6 h-6 text-neon-purple" />
-              </div>
-              <div>
-                <h3 className="font-display font-bold text-lg text-white">
-                  Manage Reviews
-                </h3>
-                <p className="text-sm text-void-400">View all testimonials</p>
-              </div>
-            </div>
-            <p className="text-void-400 text-sm mb-4">
-              View, edit, and manage all client testimonials in one place.
-            </p>
-            <div className="flex items-center gap-2 text-neon-purple text-sm font-medium">
-              <span>View All</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        </motion.div>
+            <Link
+              to={action.link}
+              className="inline-flex items-center gap-1 text-sm font-medium"
+              style={{ color: 'var(--accent-cyan)' }}
+            >
+              {action.linkText} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        ))}
       </div>
 
       {/* Recent Testimonials */}
@@ -256,58 +183,53 @@ const DashboardPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="card-cyber p-6"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-display font-bold text-xl text-white">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               Recent Testimonials
-            </h3>
+            </h2>
             <Link
               to="/admin/testimonials"
-              className="text-sm text-neon-cyan hover:text-neon-purple transition-colors flex items-center gap-1"
+              className="text-sm flex items-center gap-1"
+              style={{ color: 'var(--accent-cyan)' }}
             >
-              View All
-              <ArrowRight className="w-4 h-4" />
+              View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-
           <div className="space-y-4">
             {stats.recent_testimonials.map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="flex items-start gap-4 p-4 rounded-xl bg-void-800/30 border border-void-700/50"
+                className="p-4 rounded-xl"
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-primary)',
+                }}
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 flex items-center justify-center flex-shrink-0">
-                  <span className="font-display font-bold text-sm text-neon-cyan">
-                    {testimonial.client_name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h4 className="font-semibold text-white truncate">
-                        {testimonial.client_name}
-                      </h4>
-                      <p className="text-sm text-void-500">
-                        {testimonial.project_name}
-                      </p>
-                    </div>
-                    <StarRating rating={testimonial.rating} size="sm" />
-                  </div>
-                  <p className="text-void-400 text-sm mt-2 line-clamp-2">
-                    "{testimonial.title}"
-                  </p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-void-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
+                <div className="flex items-start gap-4">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))'
+                    }}
+                  >
+                    <span className="text-white font-bold">
+                      {testimonial.client_name?.charAt(0) || 'A'}
                     </span>
-                    {testimonial.is_featured && (
-                      <span className="flex items-center gap-1 text-neon-yellow">
-                        <Star className="w-3 h-3" />
-                        Featured
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                        {testimonial.client_name}
                       </span>
-                    )}
+                      <StarRating rating={testimonial.rating} size={14} readonly />
+                    </div>
+                    <p className="text-sm truncate" style={{ color: 'var(--text-tertiary)' }}>
+                      {testimonial.title}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                      {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -318,5 +240,40 @@ const DashboardPage = () => {
     </div>
   );
 };
+
+const StatCard = ({ card }) => (
+  <div 
+    className="h-full p-6 rounded-2xl transition-all duration-300 hover:scale-[1.02]"
+    style={{
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid var(--border-primary)',
+      background: card.gradient,
+    }}
+  >
+    <div className="flex items-start justify-between mb-4">
+      <div 
+        className="w-12 h-12 rounded-xl flex items-center justify-center"
+        style={{ 
+          backgroundColor: 'var(--bg-tertiary)',
+          border: '1px solid var(--border-primary)'
+        }}
+      >
+        <card.icon className="w-6 h-6" style={{ color: card.iconColor }} />
+      </div>
+      {card.link && <ArrowRight className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />}
+    </div>
+    <div 
+      className="text-3xl font-display font-bold mb-1"
+      style={{ color: card.iconColor }}
+    >
+      {card.value}
+      {card.icon === Star && <Star className="inline w-5 h-5 ml-1 fill-current" />}
+    </div>
+    <p style={{ color: 'var(--text-muted)' }}>
+      {card.label}
+      {card.subValue && <span className="text-sm ml-1">{card.subValue}</span>}
+    </p>
+  </div>
+);
 
 export default DashboardPage;

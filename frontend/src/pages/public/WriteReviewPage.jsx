@@ -19,11 +19,13 @@ import {
 import { publicAPI } from '../../utils/api';
 import StarRating from '../../components/ui/StarRating';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+import useThemeStore from '../../context/themeStore';
 
 const WriteReviewPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
+  const { theme, applyTheme } = useThemeStore();
 
   const [validating, setValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -41,6 +43,14 @@ const WriteReviewPage = () => {
   });
 
   const [errors, setErrors] = useState({});
+
+  // Force light mode for review page
+  useEffect(() => {
+    applyTheme('light');
+    return () => {
+      applyTheme(theme);
+    };
+  }, []);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -84,34 +94,19 @@ const WriteReviewPage = () => {
     setFormData((prev) => ({ ...prev, rating }));
   };
 
-  const validate = () => {
+  const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.client_name.trim()) {
-      newErrors.client_name = 'Nama wajib diisi';
-    }
-    if (!formData.title.trim()) {
-      newErrors.title = 'Judul testimoni wajib diisi';
-    } else if (formData.title.length < 5) {
-      newErrors.title = 'Judul minimal 5 karakter';
-    }
-    if (!formData.content.trim()) {
-      newErrors.content = 'Isi testimoni wajib diisi';
-    } else if (formData.content.length < 20) {
-      newErrors.content = 'Testimoni minimal 20 karakter';
-    }
-
+    if (!formData.client_name.trim()) newErrors.client_name = 'Nama wajib diisi';
+    if (!formData.title.trim()) newErrors.title = 'Judul wajib diisi';
+    if (!formData.content.trim()) newErrors.content = 'Isi testimoni wajib diisi';
+    if (formData.content.length < 20) newErrors.content = 'Testimoni minimal 20 karakter';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validate()) {
-      toast.error('Mohon lengkapi semua field yang wajib diisi');
-      return;
-    }
+    if (!validateForm()) return;
 
     setSubmitting(true);
     try {
@@ -119,12 +114,9 @@ const WriteReviewPage = () => {
         token,
         ...formData
       });
-      
-      toast.success('Testimoni berhasil dikirim!');
       navigate('/review/success');
     } catch (error) {
-      const errorMessage = error.response?.data?.detail || 'Gagal mengirim testimoni';
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.detail || 'Gagal mengirim testimoni');
     } finally {
       setSubmitting(false);
     }
@@ -132,27 +124,40 @@ const WriteReviewPage = () => {
 
   if (validating) return <LoadingScreen />;
 
+  // Invalid token state
   if (!isValid) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center py-12">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-md w-full mx-4"
         >
-          <div className="card-cyber p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
+          <div 
+            className="p-8 rounded-2xl text-center"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-primary)',
+            }}
+          >
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
+              style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}
+            >
               <AlertCircle className="w-8 h-8 text-red-500" />
             </div>
-            <h2 className="font-display font-bold text-2xl text-white mb-4">
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               Link Tidak Valid
             </h2>
-            <p className="text-void-400 mb-6">{message}</p>
-            <div className="p-4 rounded-lg bg-void-800/50 border border-void-700/50">
-              <p className="text-sm text-void-400">
-                Jika Anda yakin link ini valid, silakan hubungi pemilik proyek untuk mendapatkan link undangan baru.
-              </p>
-            </div>
+            <p className="mb-6" style={{ color: 'var(--text-muted)' }}>
+              {message}
+            </p>
+            <button
+              onClick={() => navigate('/')}
+              className="btn-primary"
+            >
+              Kembali ke Beranda
+            </button>
           </div>
         </motion.div>
       </div>
@@ -160,49 +165,72 @@ const WriteReviewPage = () => {
   }
 
   return (
-    <div className="py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+    <div className="min-h-[80vh] py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="flex justify-center mb-6"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-green/10 border border-neon-green/20 mb-6">
-            <CheckCircle className="w-4 h-4 text-neon-green" />
-            <span className="text-sm font-medium text-neon-green">
-              Undangan Terverifikasi
-            </span>
-          </div>
-          
-          <h1 className="font-display font-bold text-3xl lg:text-4xl text-white mb-4">
-            Tulis <span className="text-gradient">Testimoni Anda</span>
-          </h1>
-          
-          <p className="text-void-400 max-w-xl mx-auto">
-            Terima kasih telah meluangkan waktu untuk berbagi pengalaman Anda.
-            Testimoni Anda sangat berarti bagi kami.
-          </p>
+          <span 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm"
+            style={{
+              backgroundColor: 'rgba(34,197,94,0.1)',
+              border: '1px solid rgba(34,197,94,0.3)',
+              color: '#22c55e',
+            }}
+          >
+            <CheckCircle className="w-4 h-4" />
+            Undangan Terverifikasi
+          </span>
         </motion.div>
 
-        {/* Project info */}
+        {/* Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="card-cyber p-6 mb-8"
+          className="text-center mb-8"
+        >
+          <h1 className="text-3xl font-display font-bold text-gradient mb-4">
+            Testimoni Anda
+          </h1>
+          <p style={{ color: 'var(--text-muted)' }}>
+            Terima kasih telah meluangkan waktu untuk berbagi pengalaman Anda. 
+            Testimoni Anda sangat berarti bagi kami.
+          </p>
+        </motion.div>
+
+        {/* Project Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="p-6 rounded-2xl mb-8"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-primary)',
+          }}
         >
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 border border-neon-cyan/30 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-neon-cyan" />
+            <div 
+              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ 
+                background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))',
+              }}
+            >
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-void-500 mb-1">Proyek</p>
-              <h3 className="font-display font-bold text-xl text-white">
+              <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>Proyek</p>
+              <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
                 {project?.name}
               </h3>
               {project?.description && (
-                <p className="text-void-400 mt-2">{project.description}</p>
+                <p className="text-sm mt-2" style={{ color: 'var(--text-tertiary)' }}>
+                  {project.description}
+                </p>
               )}
             </div>
           </div>
@@ -212,157 +240,164 @@ const WriteReviewPage = () => {
         <motion.form
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
           onSubmit={handleSubmit}
-          className="card-cyber p-6 lg:p-8"
+          className="space-y-6"
         >
-          <div className="space-y-6">
-            {/* Rating */}
-            <div>
-              <label className="block text-sm font-medium text-void-300 mb-3">
-                Rating Anda *
-              </label>
-              <div className="flex items-center gap-4">
-                <StarRating
-                  rating={formData.rating}
-                  onChange={handleRatingChange}
-                  readonly={false}
-                  size="xl"
-                />
-                <span className="font-mono text-lg text-void-400">
-                  {formData.rating}/5
-                </span>
-              </div>
-            </div>
-
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-void-300 mb-2">
-                <User className="w-4 h-4 inline mr-2" />
-                Nama Anda *
-              </label>
-              <input
-                type="text"
-                name="client_name"
-                value={formData.client_name}
-                onChange={handleChange}
-                placeholder="Masukkan nama lengkap Anda"
-                className={`input-cyber ${errors.client_name ? 'input-error' : ''}`}
+          {/* Rating */}
+          <div 
+            className="p-6 rounded-2xl"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-primary)',
+            }}
+          >
+            <label className="block mb-3" style={{ color: 'var(--text-primary)' }}>
+              Rating Anda <span className="text-red-500">*</span>
+            </label>
+            <div className="flex items-center gap-4">
+              <StarRating 
+                rating={formData.rating} 
+                onChange={handleRatingChange} 
+                size={32}
               />
-              {errors.client_name && (
-                <p className="mt-1 text-sm text-red-400">{errors.client_name}</p>
-              )}
+              <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+                {formData.rating}/5
+              </span>
             </div>
+          </div>
 
-            {/* Role & Company */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-void-300 mb-2">
-                  <Briefcase className="w-4 h-4 inline mr-2" />
-                  Jabatan (Opsional)
-                </label>
-                <input
-                  type="text"
-                  name="client_role"
-                  value={formData.client_role}
-                  onChange={handleChange}
-                  placeholder="Contoh: CEO, Manager, Developer"
-                  className="input-cyber"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-void-300 mb-2">
-                  <Building2 className="w-4 h-4 inline mr-2" />
-                  Perusahaan (Opsional)
-                </label>
-                <input
-                  type="text"
-                  name="client_company"
-                  value={formData.client_company}
-                  onChange={handleChange}
-                  placeholder="Nama perusahaan Anda"
-                  className="input-cyber"
-                />
-              </div>
-            </div>
+          {/* Personal Info */}
+          <div 
+            className="p-6 rounded-2xl space-y-4"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-primary)',
+            }}
+          >
+            <InputField
+              label="Nama Lengkap"
+              name="client_name"
+              value={formData.client_name}
+              onChange={handleChange}
+              error={errors.client_name}
+              icon={User}
+              required
+              placeholder="Nama Anda"
+            />
+            <InputField
+              label="Jabatan/Posisi"
+              name="client_role"
+              value={formData.client_role}
+              onChange={handleChange}
+              icon={Briefcase}
+              placeholder="Contoh: Project Manager"
+            />
+            <InputField
+              label="Perusahaan/Instansi"
+              name="client_company"
+              value={formData.client_company}
+              onChange={handleChange}
+              icon={Building2}
+              placeholder="Nama perusahaan Anda"
+            />
+          </div>
 
-            {/* Title */}
+          {/* Testimonial Content */}
+          <div 
+            className="p-6 rounded-2xl space-y-4"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-primary)',
+            }}
+          >
+            <InputField
+              label="Judul Testimoni"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              error={errors.title}
+              icon={FileText}
+              required
+              placeholder="Ringkasan singkat pengalaman Anda"
+            />
             <div>
-              <label className="block text-sm font-medium text-void-300 mb-2">
-                <FileText className="w-4 h-4 inline mr-2" />
-                Judul Testimoni *
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Ringkasan singkat pengalaman Anda"
-                className={`input-cyber ${errors.title ? 'input-error' : ''}`}
-              />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-400">{errors.title}</p>
-              )}
-            </div>
-
-            {/* Content */}
-            <div>
-              <label className="block text-sm font-medium text-void-300 mb-2">
-                <MessageSquare className="w-4 h-4 inline mr-2" />
-                Isi Testimoni *
+              <label className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-primary)' }}>
+                <MessageSquare className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                Isi Testimoni <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="content"
                 value={formData.content}
                 onChange={handleChange}
+                rows={5}
                 placeholder="Ceritakan pengalaman Anda bekerja sama dengan kami..."
-                rows={6}
                 className={`input-cyber resize-none ${errors.content ? 'input-error' : ''}`}
               />
-              <div className="flex items-center justify-between mt-2">
-                {errors.content && (
-                  <p className="text-sm text-red-400">{errors.content}</p>
-                )}
-                <p className="text-xs text-void-500 ml-auto">
-                  {formData.content.length} / 5000 karakter
-                </p>
-              </div>
-            </div>
-
-            {/* Privacy note */}
-            <div className="p-4 rounded-lg bg-void-800/50 border border-void-700/50">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-neon-cyan flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-void-400">
-                  Testimoni Anda akan ditampilkan secara publik dengan nama dan informasi yang Anda berikan. 
-                  Pastikan Anda tidak menyertakan informasi sensitif atau pribadi.
-                </p>
-              </div>
-            </div>
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn-primary w-full flex items-center justify-center gap-2"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Mengirim...
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  Kirim Testimoni
-                </>
+              {errors.content && (
+                <p className="text-red-500 text-sm mt-1">{errors.content}</p>
               )}
-            </button>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                {formData.content.length} / 5000 karakter
+              </p>
+            </div>
           </div>
+
+          {/* Privacy Notice */}
+          <div 
+            className="p-4 rounded-xl flex items-start gap-3"
+            style={{
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+            }}
+          >
+            <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-cyan)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              Testimoni Anda akan ditampilkan secara publik dengan nama dan informasi yang Anda berikan. 
+              Pastikan Anda tidak menyertakan informasi sensitif atau pribadi.
+            </p>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn-primary w-full flex items-center justify-center gap-2"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Mengirim...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                Kirim Testimoni
+              </>
+            )}
+          </button>
         </motion.form>
       </div>
     </div>
   );
 };
+
+const InputField = ({ label, name, value, onChange, error, icon: Icon, required, placeholder }) => (
+  <div>
+    <label className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-primary)' }}>
+      {Icon && <Icon className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />}
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      type="text"
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`input-cyber ${error ? 'input-error' : ''}`}
+    />
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
 
 export default WriteReviewPage;

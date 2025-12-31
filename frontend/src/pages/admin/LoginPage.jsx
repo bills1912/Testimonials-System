@@ -112,14 +112,16 @@ const LoginPage = () => {
                 Username
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <User className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="Masukkan username"
-                  className="input-cyber pl-12"
+                  className="input-cyber input-with-icon-left"
                   autoComplete="username"
                 />
               </div>
@@ -131,20 +133,22 @@ const LoginPage = () => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+                <div className="input-icon-left">
+                  <Lock className="w-5 h-5 text-void-500" />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Masukkan password"
-                  className="input-cyber pl-12 pr-12"
+                  className="input-cyber input-with-icon-left input-with-icon-right"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-void-500 hover:text-void-300 transition-colors"
+                  className="input-icon-right text-void-500 hover:text-void-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>

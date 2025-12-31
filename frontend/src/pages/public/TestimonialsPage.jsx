@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Filter, Star, MessageSquare, SlidersHorizontal } from 'lucide-react';
 import { publicAPI } from '../../utils/api';
 import TestimonialCard from '../../components/ui/TestimonialCard';
+import CyberSelect from '../../components/ui/CyberSelect';
 import LoadingScreen from '../../components/ui/LoadingScreen';
 
 const TestimonialsPage = () => {
@@ -12,6 +13,20 @@ const TestimonialsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState(0);
   const [sortBy, setSortBy] = useState('newest');
+
+  const ratingOptions = [
+    { value: 0, label: 'All Ratings' },
+    { value: 5, label: '5 Stars Only' },
+    { value: 4, label: '4+ Stars' },
+    { value: 3, label: '3+ Stars' }
+  ];
+
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'highest', label: 'Highest Rated' },
+    { value: 'lowest', label: 'Lowest Rated' }
+  ];
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -112,50 +127,41 @@ const TestimonialsPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="card-cyber p-4 mb-8"
+          className="card-cyber p-4 mb-8 relative"
+          style={{ zIndex: 100 }}
         >
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-void-500" />
+              <div className="input-icon-left">
+                <Search className="w-5 h-5 text-void-500" />
+              </div>
               <input
                 type="text"
                 placeholder="Search testimonials..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-cyber pl-12"
+                className="input-cyber input-with-icon-left"
               />
             </div>
 
-            {/* Rating filter */}
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-void-500" />
-              <select
-                value={ratingFilter}
-                onChange={(e) => setRatingFilter(Number(e.target.value))}
-                className="input-cyber w-40"
-              >
-                <option value={0}>All Ratings</option>
-                <option value={5}>5 Stars</option>
-                <option value={4}>4+ Stars</option>
-                <option value={3}>3+ Stars</option>
-              </select>
-            </div>
+            {/* Rating filter - Custom Select */}
+            <CyberSelect
+              options={ratingOptions}
+              value={ratingFilter}
+              onChange={setRatingFilter}
+              icon={Star}
+              className="w-full lg:w-48"
+            />
 
-            {/* Sort */}
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-5 h-5 text-void-500" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="input-cyber w-40"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="highest">Highest Rated</option>
-                <option value="lowest">Lowest Rated</option>
-              </select>
-            </div>
+            {/* Sort - Custom Select */}
+            <CyberSelect
+              options={sortOptions}
+              value={sortBy}
+              onChange={setSortBy}
+              icon={SlidersHorizontal}
+              className="w-full lg:w-48"
+            />
           </div>
         </motion.div>
 
