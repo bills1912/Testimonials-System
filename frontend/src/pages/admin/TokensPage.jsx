@@ -21,6 +21,9 @@ import { tokenAPI, adminAPI, parseErrorMessage } from '../../utils/api';
 import Modal from '../../components/ui/Modal';
 import CyberSelect from '../../components/ui/CyberSelect';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+import Pagination from '../../components/ui/Pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 const tokenStatusOptions = [
   { value: 'all', label: 'All Status' },
@@ -50,6 +53,7 @@ const TokensPage = () => {
   const [copiedToken, setCopiedToken] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   const [formData, setFormData] = useState({
     project_id: '',
@@ -77,6 +81,7 @@ const TokensPage = () => {
     fetchData();
   }, []);
 
+  // Filter tokens based on status and search query
   const filteredTokens = tokens.filter((token) => {
     const matchesStatus = statusFilter === 'all' || token.status === statusFilter;
     const matchesSearch = 
@@ -85,6 +90,22 @@ const TokensPage = () => {
       (token.note && token.note.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesStatus && matchesSearch;
   });
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredTokens.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedTokens = filteredTokens.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top of tokens section
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleGenerate = async (e) => {
     e.preventDefault();
@@ -237,105 +258,134 @@ const TokensPage = () => {
         </div>
       </div>
 
+      {/* Results count */}
+      <div className="flex items-center justify-between">
+        <p className="text-void-400">
+          Menampilkan <span className="text-white font-medium">{filteredTokens.length}</span> token
+        </p>
+        {(searchQuery || statusFilter !== 'all') && (
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter('all');
+            }}
+            className="text-sm text-neon-cyan hover:text-neon-purple transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
       {/* Tokens List */}
-      {filteredTokens.length > 0 ? (
-        <div className="space-y-4">
-          {filteredTokens.map((token, index) => {
-            const status = statusConfig[token.status];
-            const StatusIcon = status.icon;
-            
-            return (
-              <motion.div
-                key={token.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="card-cyber p-4 lg:p-6"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  {/* Token Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border ${status.color}`}>
-                        <StatusIcon className="w-3 h-3" />
-                        {status.label}
-                      </span>
-                      <span className="text-sm font-medium text-white">
-                        {token.project_name}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <code className="flex-1 font-mono text-sm text-void-300 bg-void-800/50 px-3 py-2 rounded-lg truncate">
-                        {token.invite_url}
-                      </code>
-                      <button
-                        onClick={() => copyToClipboard(token.invite_url, token.id)}
-                        className={`p-2 rounded-lg transition-all flex-shrink-0 ${
-                          copiedToken === token.id
-                            ? 'bg-neon-green/10 text-neon-green'
-                            : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                        }`}
-                      >
-                        {copiedToken === token.id ? (
-                          <CheckCircle className="w-5 h-5" />
-                        ) : (
-                          <Copy className="w-5 h-5" />
-                        )}
-                      </button>
-                    </div>
-                    
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
-                      <span>
-                        Created: {format(new Date(token.created_at), 'dd MMM yyyy HH:mm')}
-                      </span>
-                      <span>
-                        Expires: {format(new Date(token.expires_at), 'dd MMM yyyy HH:mm')}
-                      </span>
-                      {token.used_at && (
-                        <span className="text-neon-cyan">
-                          Used: {format(new Date(token.used_at), 'dd MMM yyyy HH:mm')}
+      {paginatedTokens.length > 0 ? (
+        <>
+          <div className="space-y-4">
+            {paginatedTokens.map((token, index) => {
+              const status = statusConfig[token.status];
+              const StatusIcon = status.icon;
+              
+              return (
+                <motion.div
+                  key={token.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="card-cyber p-4 lg:p-6"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    {/* Token Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border ${status.color}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {status.label}
                         </span>
-                      )}
-                      {token.note && (
-                        <span className="text-void-400">
-                          Note: {token.note}
+                        <span className="text-sm font-medium text-white">
+                          {token.project_name}
                         </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    {token.status === 'active' && (
-                      <>
-                        <a
-                          href={`https://wa.me/?text=${encodeURIComponent(`Silakan berikan testimoni Anda melalui link berikut: ${token.invite_url}`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-lg bg-neon-green/10 text-neon-green hover:bg-neon-green/20 transition-colors"
-                          title="Share via WhatsApp"
-                        >
-                          <Send className="w-5 h-5" />
-                        </a>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mb-2">
+                        <code className="flex-1 font-mono text-sm text-void-300 bg-void-800/50 px-3 py-2 rounded-lg truncate">
+                          {token.invite_url}
+                        </code>
                         <button
-                          onClick={() => {
-                            setSelectedToken(token);
-                            setShowRevokeModal(true);
-                          }}
-                          className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                          title="Revoke Token"
+                          onClick={() => copyToClipboard(token.invite_url, token.id)}
+                          className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+                            copiedToken === token.id
+                              ? 'bg-neon-green/10 text-neon-green'
+                              : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
+                          }`}
                         >
-                          <Trash2 className="w-5 h-5" />
+                          {copiedToken === token.id ? (
+                            <CheckCircle className="w-5 h-5" />
+                          ) : (
+                            <Copy className="w-5 h-5" />
+                          )}
                         </button>
-                      </>
-                    )}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
+                        <span>
+                          Created: {format(new Date(token.created_at), 'dd MMM yyyy HH:mm')}
+                        </span>
+                        <span>
+                          Expires: {format(new Date(token.expires_at), 'dd MMM yyyy HH:mm')}
+                        </span>
+                        {token.used_at && (
+                          <span className="text-neon-cyan">
+                            Used: {format(new Date(token.used_at), 'dd MMM yyyy HH:mm')}
+                          </span>
+                        )}
+                        {token.note && (
+                          <span className="text-void-400">
+                            Note: {token.note}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                      {token.status === 'active' && (
+                        <>
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(`Silakan berikan testimoni Anda melalui link berikut: ${token.invite_url}`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 rounded-lg bg-neon-green/10 text-neon-green hover:bg-neon-green/20 transition-colors"
+                            title="Share via WhatsApp"
+                          >
+                            <Send className="w-5 h-5" />
+                          </a>
+                          <button
+                            onClick={() => {
+                              setSelectedToken(token);
+                              setShowRevokeModal(true);
+                            }}
+                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                            title="Revoke Token"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            totalItems={filteredTokens.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
+        </>
       ) : (
         <div className="card-cyber p-12 text-center">
           <Key className="w-12 h-12 text-void-600 mx-auto mb-4" />

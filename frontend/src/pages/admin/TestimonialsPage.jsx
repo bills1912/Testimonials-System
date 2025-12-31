@@ -2,19 +2,19 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import {
-  MessageSquareQuote,
   Search,
   Filter,
   Star,
+  MessageSquare,
+  SlidersHorizontal,
   Eye,
   EyeOff,
   Trash2,
+  Award,
   MoreVertical,
-  Calendar,
   User,
-  Building2,
-  Loader2,
-  SlidersHorizontal
+  Calendar,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { adminAPI, parseErrorMessage } from '../../utils/api';
@@ -22,31 +22,42 @@ import Modal from '../../components/ui/Modal';
 import CyberSelect from '../../components/ui/CyberSelect';
 import StarRating from '../../components/ui/StarRating';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+import Pagination from '../../components/ui/Pagination';
 
-const ratingFilterOptions = [
+const ITEMS_PER_PAGE = 10;
+
+const ratingOptions = [
   { value: 0, label: 'All Ratings' },
-  { value: 5, label: '5 Stars' },
+  { value: 5, label: '5 Stars Only' },
   { value: 4, label: '4+ Stars' },
   { value: 3, label: '3+ Stars' }
 ];
 
-const statusFilterOptions = [
-  { value: 'all', label: 'All Status' },
-  { value: 'featured', label: 'Featured' },
-  { value: 'published', label: 'Published' },
-  { value: 'unpublished', label: 'Unpublished' }
+const sortOptions = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'highest', label: 'Highest Rated' },
+  { value: 'lowest', label: 'Lowest Rated' }
 ];
 
-const TestimonialsPage = () => {
+const statusOptions = [
+  { value: 'all', label: 'All Status' },
+  { value: 'published', label: 'Published' },
+  { value: 'unpublished', label: 'Unpublished' },
+  { value: 'featured', label: 'Featured' }
+];
+
+const AdminTestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState(0);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedTestimonial, setSelectedTestimonial] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const fetchTestimonials = async () => {
     try {
@@ -54,7 +65,7 @@ const TestimonialsPage = () => {
       setTestimonials(response.data);
     } catch (error) {
       console.error('Error fetching testimonials:', error);
-      toast.error('Gagal memuat testimoni');
+      toast.error('Gagal memuat data testimoni');
     } finally {
       setLoading(false);
     }
@@ -64,63 +75,121 @@ const TestimonialsPage = () => {
     fetchTestimonials();
   }, []);
 
+  // Filter and sort testimonials
   const filteredTestimonials = testimonials.filter((t) => {
-    const matchesSearch = 
+    // Search filter
+    const matchesSearch = !searchQuery || 
       t.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.project_name.toLowerCase().includes(searchQuery.toLowerCase());
+      t.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.project_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Rating filter
     const matchesRating = ratingFilter === 0 || t.rating >= ratingFilter;
-    const matchesStatus = 
-      statusFilter === 'all' ||
-      (statusFilter === 'featured' && t.is_featured) ||
-      (statusFilter === 'published' && t.is_published) ||
-      (statusFilter === 'unpublished' && !t.is_published);
+    
+    // Status filter
+    let matchesStatus = true;
+    if (statusFilter === 'published') matchesStatus = t.is_published;
+    else if (statusFilter === 'unpublished') matchesStatus = !t.is_published;
+    else if (statusFilter === 'featured') matchesStatus = t.is_featured;
+    
     return matchesSearch && matchesRating && matchesStatus;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.created_at) - new Date(a.created_at);
+      case 'oldest':
+        return new Date(a.created_at) - new Date(b.created_at);
+      case 'highest':
+        return b.rating - a.rating;
+      case 'lowest':
+        return a.rating - b.rating;
+      default:
+        return 0;
+    }
   });
 
-  const toggleFeatured = async (id) => {
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, ratingFilter, statusFilter, sortBy]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredTestimonials.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedTestimonials = filteredTestimonials.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleToggleFeatured = async (testimonial) => {
+    setProcessing(true);
     try {
-      const response = await adminAPI.toggleFeatured(id);
-      setTestimonials(testimonials.map(t =>
-        t.id === id ? { ...t, is_featured: response.data.is_featured } : t
+      await adminAPI.toggleFeatured(testimonial.id);
+      setTestimonials(testimonials.map(t => 
+        t.id === testimonial.id ? { ...t, is_featured: !t.is_featured } : t
       ));
-      toast.success(response.data.is_featured ? 'Marked as featured' : 'Removed from featured');
+      toast.success(testimonial.is_featured ? 'Featured dihapus' : 'Ditandai sebagai featured');
     } catch (error) {
       toast.error(parseErrorMessage(error, 'Gagal mengubah status featured'));
+    } finally {
+      setProcessing(false);
     }
   };
 
-  const togglePublished = async (id) => {
+  const handleTogglePublished = async (testimonial) => {
+    setProcessing(true);
     try {
-      const response = await adminAPI.togglePublished(id);
-      setTestimonials(testimonials.map(t =>
-        t.id === id ? { ...t, is_published: response.data.is_published } : t
+      await adminAPI.togglePublished(testimonial.id);
+      setTestimonials(testimonials.map(t => 
+        t.id === testimonial.id ? { ...t, is_published: !t.is_published } : t
       ));
-      toast.success(response.data.is_published ? 'Published' : 'Unpublished');
+      toast.success(testimonial.is_published ? 'Testimoni disembunyikan' : 'Testimoni dipublikasikan');
     } catch (error) {
-      toast.error(parseErrorMessage(error, 'Gagal mengubah status publish'));
+      toast.error(parseErrorMessage(error, 'Gagal mengubah status publikasi'));
+    } finally {
+      setProcessing(false);
     }
   };
 
   const handleDelete = async () => {
-    setDeleting(true);
+    if (!selectedTestimonial) return;
+    
+    setProcessing(true);
     try {
       await adminAPI.deleteTestimonial(selectedTestimonial.id);
       setTestimonials(testimonials.filter(t => t.id !== selectedTestimonial.id));
       toast.success('Testimoni berhasil dihapus');
       setShowDeleteModal(false);
       setSelectedTestimonial(null);
+      // Reset to previous page if current page becomes empty
+      if (paginatedTestimonials.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
     } catch (error) {
       toast.error(parseErrorMessage(error, 'Gagal menghapus testimoni'));
     } finally {
-      setDeleting(false);
+      setProcessing(false);
     }
   };
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setRatingFilter(0);
+    setStatusFilter('all');
+    setSortBy('newest');
+  };
+
+  const hasActiveFilters = searchQuery || ratingFilter > 0 || statusFilter !== 'all';
+
   if (loading) return <LoadingScreen />;
 
+  // Stats
   const stats = {
     total: testimonials.length,
+    published: testimonials.filter(t => t.is_published).length,
     featured: testimonials.filter(t => t.is_featured).length,
     avgRating: testimonials.length > 0 
       ? (testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length).toFixed(1)
@@ -135,46 +204,40 @@ const TestimonialsPage = () => {
           Testimonials
         </h1>
         <p className="text-void-400">
-          Kelola semua testimoni dari klien Anda.
+          Kelola semua testimoni klien Anda di sini.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card-cyber p-4"
-        >
-          <p className="font-display font-bold text-2xl text-white">{stats.total}</p>
-          <p className="text-sm text-void-500">Total Reviews</p>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="card-cyber p-4"
-        >
-          <p className="font-display font-bold text-2xl text-neon-yellow">{stats.featured}</p>
-          <p className="text-sm text-void-500">Featured</p>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="card-cyber p-4"
-        >
-          <div className="flex items-center gap-2">
-            <p className="font-display font-bold text-2xl text-neon-cyan">{stats.avgRating}</p>
-            <Star className="w-5 h-5 text-neon-yellow fill-neon-yellow" />
-          </div>
-          <p className="text-sm text-void-500">Avg Rating</p>
-        </motion.div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Testimoni', value: stats.total, color: 'text-white' },
+          { label: 'Published', value: stats.published, color: 'text-neon-green' },
+          { label: 'Featured', value: stats.featured, color: 'text-neon-cyan' },
+          { label: 'Avg. Rating', value: stats.avgRating, color: 'text-neon-yellow', icon: Star }
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="card-cyber p-4"
+          >
+            <div className="flex items-center gap-2">
+              <p className={`font-display font-bold text-2xl ${stat.color}`}>
+                {stat.value}
+              </p>
+              {stat.icon && <stat.icon className="w-5 h-5 fill-neon-yellow text-neon-yellow" />}
+            </div>
+            <p className="text-sm text-void-500">{stat.label}</p>
+          </motion.div>
+        ))}
       </div>
 
       {/* Filters */}
-      <div className="card-cyber p-4 relative" style={{ zIndex: 100 }}>
+      <div className="card-cyber p-4" style={{ zIndex: 100, position: 'relative' }}>
         <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search */}
           <div className="flex-1 relative">
             <div className="input-icon-left">
               <Search className="w-5 h-5 text-void-500" />
@@ -187,221 +250,185 @@ const TestimonialsPage = () => {
               className="input-cyber input-with-icon-left"
             />
           </div>
+
+          {/* Rating filter */}
           <CyberSelect
-            options={ratingFilterOptions}
+            options={ratingOptions}
             value={ratingFilter}
-            onChange={(value) => setRatingFilter(Number(value))}
+            onChange={setRatingFilter}
             icon={Star}
-            className="w-full lg:w-44"
+            className="w-full lg:w-40"
           />
+
+          {/* Status filter */}
           <CyberSelect
-            options={statusFilterOptions}
+            options={statusOptions}
             value={statusFilter}
             onChange={setStatusFilter}
+            icon={Filter}
+            className="w-full lg:w-44"
+          />
+
+          {/* Sort */}
+          <CyberSelect
+            options={sortOptions}
+            value={sortBy}
+            onChange={setSortBy}
             icon={SlidersHorizontal}
             className="w-full lg:w-44"
           />
         </div>
       </div>
 
-      {/* Testimonials List */}
-      {filteredTestimonials.length > 0 ? (
-        <div className="space-y-4">
-          {filteredTestimonials.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="card-cyber p-6"
-            >
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Avatar & Author Info */}
-                <div className="flex items-start gap-4 lg:w-64 flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 flex items-center justify-center flex-shrink-0">
-                    <span className="font-display font-bold text-neon-cyan">
-                      {testimonial.client_name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-semibold text-white truncate">
-                      {testimonial.client_name}
-                    </h4>
-                    {testimonial.client_role && (
-                      <p className="text-sm text-void-500 truncate">
-                        {testimonial.client_role}
-                      </p>
-                    )}
-                    {testimonial.client_company && (
-                      <p className="text-sm text-void-500 truncate flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
-                        {testimonial.client_company}
-                      </p>
-                    )}
-                  </div>
-                </div>
+      {/* Results count */}
+      <div className="flex items-center justify-between">
+        <p className="text-void-400">
+          Menampilkan <span className="text-white font-medium">{filteredTestimonials.length}</span> testimoni
+        </p>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="text-sm text-neon-cyan hover:text-neon-purple transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div className="flex items-center gap-3">
-                      <StarRating rating={testimonial.rating} size="sm" />
-                      <span className="px-2 py-1 text-xs bg-void-800/50 text-void-400 rounded">
-                        {testimonial.project_name}
-                      </span>
+      {/* Testimonials List */}
+      {paginatedTestimonials.length > 0 ? (
+        <>
+          <div className="space-y-4">
+            {paginatedTestimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`card-cyber p-4 lg:p-6 ${!testimonial.is_published ? 'opacity-60' : ''}`}
+              >
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Main Content */}
+                  <div className="flex-1 min-w-0">
+                    {/* Header */}
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      {/* Badges */}
                       {testimonial.is_featured && (
-                        <span className="px-2 py-1 text-xs bg-neon-yellow/10 text-neon-yellow rounded">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border bg-neon-cyan/10 text-neon-cyan border-neon-cyan/30">
+                          <Award className="w-3 h-3" />
                           Featured
                         </span>
                       )}
                       {!testimonial.is_published && (
-                        <span className="px-2 py-1 text-xs bg-red-500/10 text-red-400 rounded">
-                          Unpublished
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border bg-void-600/10 text-void-400 border-void-600/30">
+                          <EyeOff className="w-3 h-3" />
+                          Hidden
                         </span>
                       )}
+                      <StarRating rating={testimonial.rating} size="sm" readonly />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="font-display font-bold text-lg text-white mb-2 line-clamp-1">
+                      "{testimonial.title}"
+                    </h3>
+
+                    {/* Content */}
+                    <p className="text-void-300 text-sm mb-4 line-clamp-2">
+                      {testimonial.content}
+                    </p>
+
+                    {/* Author & Meta */}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        {testimonial.client_name}
+                        {testimonial.client_company && ` @ ${testimonial.client_company}`}
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-void-800/50 border border-void-700/50">
+                        {testimonial.project_name}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
+                      </span>
                     </div>
                   </div>
-                  
-                  <h5 className="font-medium text-white mb-2">"{testimonial.title}"</h5>
-                  <p className="text-void-400 text-sm line-clamp-2 mb-3">
-                    {testimonial.content}
-                  </p>
-                  
-                  <div className="flex items-center gap-4 text-xs text-void-500">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
-                    </span>
+
+                  {/* Actions */}
+                  <div className="flex lg:flex-col items-center gap-2 lg:border-l lg:border-void-700/50 lg:pl-4">
+                    <button
+                      onClick={() => handleTogglePublished(testimonial)}
+                      disabled={processing}
+                      className={`p-2 rounded-lg transition-all ${
+                        testimonial.is_published
+                          ? 'bg-neon-green/10 text-neon-green hover:bg-neon-green/20'
+                          : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
+                      }`}
+                      title={testimonial.is_published ? 'Hide' : 'Publish'}
+                    >
+                      {testimonial.is_published ? (
+                        <Eye className="w-5 h-5" />
+                      ) : (
+                        <EyeOff className="w-5 h-5" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => handleToggleFeatured(testimonial)}
+                      disabled={processing}
+                      className={`p-2 rounded-lg transition-all ${
+                        testimonial.is_featured
+                          ? 'bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20'
+                          : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
+                      }`}
+                      title={testimonial.is_featured ? 'Remove Featured' : 'Set Featured'}
+                    >
+                      <Award className="w-5 h-5" />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedTestimonial(testimonial);
+                        setShowDeleteModal(true);
+                      }}
+                      className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
+              </motion.div>
+            ))}
+          </div>
 
-                {/* Actions */}
-                <div className="flex lg:flex-col items-center gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => {
-                      setSelectedTestimonial(testimonial);
-                      setShowViewModal(true);
-                    }}
-                    className="p-2 rounded-lg bg-void-800/50 text-void-400 hover:text-white hover:bg-void-700/50 transition-colors"
-                    title="View Details"
-                  >
-                    <Eye className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => toggleFeatured(testimonial.id)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      testimonial.is_featured
-                        ? 'bg-neon-yellow/10 text-neon-yellow'
-                        : 'bg-void-800/50 text-void-400 hover:text-neon-yellow hover:bg-void-700/50'
-                    }`}
-                    title={testimonial.is_featured ? 'Remove from featured' : 'Mark as featured'}
-                  >
-                    <Star className={`w-5 h-5 ${testimonial.is_featured ? 'fill-neon-yellow' : ''}`} />
-                  </button>
-                  <button
-                    onClick={() => togglePublished(testimonial.id)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      testimonial.is_published
-                        ? 'bg-neon-green/10 text-neon-green'
-                        : 'bg-red-500/10 text-red-400'
-                    }`}
-                    title={testimonial.is_published ? 'Unpublish' : 'Publish'}
-                  >
-                    {testimonial.is_published ? (
-                      <Eye className="w-5 h-5" />
-                    ) : (
-                      <EyeOff className="w-5 h-5" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedTestimonial(testimonial);
-                      setShowDeleteModal(true);
-                    }}
-                    className="p-2 rounded-lg bg-void-800/50 text-void-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            totalItems={filteredTestimonials.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
+        </>
       ) : (
-        <div className="card-cyber p-12 text-center">
-          <MessageSquareQuote className="w-12 h-12 text-void-600 mx-auto mb-4" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="card-cyber p-12 text-center"
+        >
+          <MessageSquare className="w-12 h-12 text-void-600 mx-auto mb-4" />
           <h3 className="font-display font-bold text-xl text-white mb-2">
-            {searchQuery || ratingFilter > 0 || statusFilter !== 'all'
-              ? 'Tidak ada testimoni ditemukan'
-              : 'Belum ada testimoni'}
+            Tidak ada testimoni ditemukan
           </h3>
           <p className="text-void-400">
-            {searchQuery || ratingFilter > 0 || statusFilter !== 'all'
-              ? 'Coba kata kunci atau filter lain'
-              : 'Generate token undangan dan kirim ke klien untuk mengumpulkan testimoni'}
+            {hasActiveFilters
+              ? 'Coba ubah filter atau kata kunci pencarian'
+              : 'Belum ada testimoni dari klien'}
           </p>
-        </div>
+        </motion.div>
       )}
-
-      {/* View Modal */}
-      <Modal
-        isOpen={showViewModal}
-        onClose={() => {
-          setShowViewModal(false);
-          setSelectedTestimonial(null);
-        }}
-        title="Testimonial Details"
-        size="lg"
-      >
-        {selectedTestimonial && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 flex items-center justify-center">
-                <span className="font-display font-bold text-xl text-neon-cyan">
-                  {selectedTestimonial.client_name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div>
-                <h4 className="font-semibold text-xl text-white">
-                  {selectedTestimonial.client_name}
-                </h4>
-                <p className="text-void-400">
-                  {selectedTestimonial.client_role}
-                  {selectedTestimonial.client_role && selectedTestimonial.client_company && ' @ '}
-                  {selectedTestimonial.client_company}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <StarRating rating={selectedTestimonial.rating} size="lg" showLabel />
-              <span className="px-3 py-1 text-sm bg-void-800/50 text-void-400 rounded">
-                {selectedTestimonial.project_name}
-              </span>
-            </div>
-
-            <div>
-              <h5 className="font-display font-bold text-lg text-white mb-2">
-                "{selectedTestimonial.title}"
-              </h5>
-              <p className="text-void-300 leading-relaxed whitespace-pre-wrap">
-                {selectedTestimonial.content}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 pt-4 border-t border-void-700/50 text-sm text-void-500">
-              <span>Created: {format(new Date(selectedTestimonial.created_at), 'dd MMMM yyyy HH:mm')}</span>
-              {selectedTestimonial.is_featured && (
-                <span className="text-neon-yellow">⭐ Featured</span>
-              )}
-              <span className={selectedTestimonial.is_published ? 'text-neon-green' : 'text-red-400'}>
-                {selectedTestimonial.is_published ? '✓ Published' : '✗ Unpublished'}
-              </span>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -410,7 +437,7 @@ const TestimonialsPage = () => {
           setShowDeleteModal(false);
           setSelectedTestimonial(null);
         }}
-        title="Delete Testimonial"
+        title="Hapus Testimoni"
         size="sm"
       >
         <div className="text-center">
@@ -438,10 +465,10 @@ const TestimonialsPage = () => {
             </button>
             <button
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={processing}
               className="btn-danger flex items-center gap-2"
             >
-              {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {processing && <Loader2 className="w-4 h-4 animate-spin" />}
               Delete
             </button>
           </div>
@@ -451,4 +478,4 @@ const TestimonialsPage = () => {
   );
 };
 
-export default TestimonialsPage;
+export default AdminTestimonialsPage;
