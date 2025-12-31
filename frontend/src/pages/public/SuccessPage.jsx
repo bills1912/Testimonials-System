@@ -28,7 +28,8 @@ const SuccessPage = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 sm:py-12 relative overflow-hidden">
+      {/* Main Content - takes remaining space */}
+      <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
         {/* Confetti */}
         <Confetti />
         
@@ -145,7 +146,7 @@ const SuccessPage = () => {
             >
               <Link
                 to="/"
-                className="btn-primary inline-flex items-center gap-2 w-full sm:w-auto justify-center py-3 sm:py-3"
+                className="btn-primary inline-flex items-center gap-2 w-full sm:w-auto justify-center py-3"
               >
                 <Home className="w-4 h-4 sm:w-5 sm:h-5" />
                 Kembali ke Beranda

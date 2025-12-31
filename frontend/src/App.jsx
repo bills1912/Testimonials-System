@@ -51,13 +51,15 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public Routes with Layout (navbar + footer) */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/testimonials" element={<TestimonialsPage />} />
-        <Route path="/review/write" element={<WriteReviewPage />} />
-        <Route path="/review/success" element={<SuccessPage />} />
       </Route>
+
+      {/* Standalone Public Routes (no navbar/footer) */}
+      <Route path="/review/write" element={<WriteReviewPage />} />
+      <Route path="/review/success" element={<SuccessPage />} />
 
       {/* Auth Routes */}
       <Route path="/admin/login" element={<LoginPage />} />
