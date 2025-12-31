@@ -1,21 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
-import { CheckCircle, Home, Sparkles, Heart } from 'lucide-react';
+import { CheckCircle, Home, Heart } from 'lucide-react';
 import Confetti from '../../components/ui/Confetti';
-import useThemeStore from '../../context/themeStore';
 
 const SuccessPage = () => {
-  const { theme, applyTheme } = useThemeStore();
-
-  // Force light mode for success page
-  useEffect(() => {
-    applyTheme('light');
-    return () => {
-      applyTheme(theme);
-    };
-  }, []);
-
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 relative overflow-hidden">
       {/* Confetti */}

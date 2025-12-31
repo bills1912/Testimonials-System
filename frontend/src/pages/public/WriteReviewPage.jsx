@@ -19,13 +19,11 @@ import {
 import { publicAPI } from '../../utils/api';
 import StarRating from '../../components/ui/StarRating';
 import LoadingScreen from '../../components/ui/LoadingScreen';
-import useThemeStore from '../../context/themeStore';
 
 const WriteReviewPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
-  const { theme, applyTheme } = useThemeStore();
 
   const [validating, setValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -43,14 +41,6 @@ const WriteReviewPage = () => {
   });
 
   const [errors, setErrors] = useState({});
-
-  // Force light mode for review page
-  useEffect(() => {
-    applyTheme('light');
-    return () => {
-      applyTheme(theme);
-    };
-  }, []);
 
   useEffect(() => {
     const validateToken = async () => {
