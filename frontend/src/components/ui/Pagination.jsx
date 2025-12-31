@@ -7,7 +7,9 @@ const Pagination = ({
   onPageChange,
   totalItems,
   itemsPerPage,
-  showItemsInfo = true 
+  showItemsInfo = true,
+  className = '',
+  rightContent = null
 }) => {
   // Calculate displayed items range
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
@@ -59,24 +61,27 @@ const Pagination = ({
   const isNavigationDisabled = totalPages <= 1;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
-      {/* Items Info */}
-      {showItemsInfo && (
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {totalItems === 0 ? (
-            <span>Tidak ada item untuk ditampilkan</span>
-          ) : (
-            <>
-              Menampilkan <span style={{ color: 'var(--text-primary)' }} className="font-medium">{startItem}</span>
-              {' - '}
-              <span style={{ color: 'var(--text-primary)' }} className="font-medium">{endItem}</span>
-              {' dari '}
-              <span style={{ color: 'var(--text-primary)' }} className="font-medium">{totalItems}</span>
-              {' item'}
-            </>
-          )}
-        </p>
-      )}
+    <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
+      {/* Items Info & Right Content */}
+      <div className="flex items-center gap-4 flex-wrap">
+        {showItemsInfo && (
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            {totalItems === 0 ? (
+              <span>Tidak ada item untuk ditampilkan</span>
+            ) : (
+              <>
+                Menampilkan <span style={{ color: 'var(--text-primary)' }} className="font-medium">{startItem}</span>
+                {' - '}
+                <span style={{ color: 'var(--text-primary)' }} className="font-medium">{endItem}</span>
+                {' dari '}
+                <span style={{ color: 'var(--text-primary)' }} className="font-medium">{totalItems}</span>
+                {' item'}
+              </>
+            )}
+          </p>
+        )}
+        {rightContent}
+      </div>
 
       {/* Pagination Controls */}
       <div className="flex items-center gap-1">

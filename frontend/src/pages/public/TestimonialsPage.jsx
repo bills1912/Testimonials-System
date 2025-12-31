@@ -104,6 +104,13 @@ const TestimonialsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setRatingFilter(0);
+  };
+
+  const hasActiveFilters = searchQuery || ratingFilter > 0;
+
   if (loading) return <LoadingScreen />;
 
   return (
@@ -185,46 +192,39 @@ const TestimonialsPage = () => {
           </div>
         </motion.div>
 
-        {/* Results count */}
-        <div className="flex items-center justify-between mb-6">
-          {(searchQuery || ratingFilter > 0) && (
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setRatingFilter(0);
-              }}
-              className="text-sm text-neon-cyan hover:text-neon-purple transition-colors"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
-
         {/* Pagination - Always visible */}
-        <div className='mb-6'>
+        <div className="mb-6">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
             totalItems={filteredTestimonials.length}
             itemsPerPage={ITEMS_PER_PAGE}
+            rightContent={
+              hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-neon-cyan hover:text-neon-purple transition-colors"
+                >
+                  Clear filters
+                </button>
+              )
+            }
           />
         </div>
 
         {/* Testimonials grid */}
         {paginatedTestimonials.length > 0 ? (
-          <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedTestimonials.map((testimonial, index) => (
-                <TestimonialCard
-                  key={testimonial.id}
-                  testimonial={testimonial}
-                  featured={testimonial.is_featured}
-                  delay={index * 0.05}
-                />
-              ))}
-            </div>
-          </>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedTestimonials.map((testimonial, index) => (
+              <TestimonialCard
+                key={testimonial.id}
+                testimonial={testimonial}
+                featured={testimonial.is_featured}
+                delay={index * 0.05}
+              />
+            ))}
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
@@ -236,7 +236,7 @@ const TestimonialsPage = () => {
               No testimonials found
             </h3>
             <p className="text-void-400">
-              {searchQuery || ratingFilter > 0
+              {hasActiveFilters
                 ? 'Try adjusting your search or filters'
                 : 'Be the first to leave a testimonial!'}
             </p>

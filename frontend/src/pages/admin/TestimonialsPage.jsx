@@ -11,7 +11,6 @@ import {
   EyeOff,
   Trash2,
   Award,
-  MoreVertical,
   User,
   Calendar,
   Loader2
@@ -124,6 +123,15 @@ const AdminTestimonialsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setRatingFilter(0);
+    setStatusFilter('all');
+    setSortBy('newest');
+  };
+
+  const hasActiveFilters = searchQuery || ratingFilter > 0 || statusFilter !== 'all';
+
   const handleToggleFeatured = async (testimonial) => {
     setProcessing(true);
     try {
@@ -174,15 +182,6 @@ const AdminTestimonialsPage = () => {
       setProcessing(false);
     }
   };
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setRatingFilter(0);
-    setStatusFilter('all');
-    setSortBy('newest');
-  };
-
-  const hasActiveFilters = searchQuery || ratingFilter > 0 || statusFilter !== 'all';
 
   if (loading) return <LoadingScreen />;
 
@@ -280,135 +279,133 @@ const AdminTestimonialsPage = () => {
         </div>
       </div>
 
-      {/* Results count */}
-      <div className="flex items-center justify-between">
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="text-sm text-neon-cyan hover:text-neon-purple transition-colors"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
-
       {/* Pagination - Always visible */}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        totalItems={filteredTestimonials.length}
-        itemsPerPage={ITEMS_PER_PAGE}
-      />
+      <div className="mb-2">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={filteredTestimonials.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          rightContent={
+            hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-neon-cyan hover:text-neon-purple transition-colors"
+              >
+                Clear filters
+              </button>
+            )
+          }
+        />
+      </div>
 
       {/* Testimonials List */}
       {paginatedTestimonials.length > 0 ? (
-        <>
-          <div className="space-y-4">
-            {paginatedTestimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`card-cyber p-4 lg:p-6 ${!testimonial.is_published ? 'opacity-60' : ''}`}
-              >
-                <div className="flex flex-col lg:flex-row gap-4">
-                  {/* Main Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Header */}
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      {/* Badges */}
-                      {testimonial.is_featured && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border bg-neon-cyan/10 text-neon-cyan border-neon-cyan/30">
-                          <Award className="w-3 h-3" />
-                          Featured
-                        </span>
-                      )}
-                      {!testimonial.is_published && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border bg-void-600/10 text-void-400 border-void-600/30">
-                          <EyeOff className="w-3 h-3" />
-                          Hidden
-                        </span>
-                      )}
-                      <StarRating rating={testimonial.rating} size="sm" readonly />
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="font-display font-bold text-lg text-white mb-2 line-clamp-1">
-                      "{testimonial.title}"
-                    </h3>
-
-                    {/* Content */}
-                    <p className="text-void-300 text-sm mb-4 line-clamp-2">
-                      {testimonial.content}
-                    </p>
-
-                    {/* Author & Meta */}
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
-                      <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        {testimonial.client_name}
-                        {testimonial.client_company && ` @ ${testimonial.client_company}`}
+        <div className="space-y-4">
+          {paginatedTestimonials.map((testimonial, index) => (
+            <motion.div
+              key={testimonial.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className={`card-cyber p-4 lg:p-6 ${!testimonial.is_published ? 'opacity-60' : ''}`}
+            >
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Main Content */}
+                <div className="flex-1 min-w-0">
+                  {/* Header */}
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    {/* Badges */}
+                    {testimonial.is_featured && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border bg-neon-cyan/10 text-neon-cyan border-neon-cyan/30">
+                        <Award className="w-3 h-3" />
+                        Featured
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-void-800/50 border border-void-700/50">
-                        {testimonial.project_name}
+                    )}
+                    {!testimonial.is_published && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border bg-void-600/10 text-void-400 border-void-600/30">
+                        <EyeOff className="w-3 h-3" />
+                        Hidden
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
-                      </span>
-                    </div>
+                    )}
+                    <StarRating rating={testimonial.rating} size="sm" readonly />
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex lg:flex-col items-center gap-2 lg:border-l lg:border-void-700/50 lg:pl-4">
-                    <button
-                      onClick={() => handleTogglePublished(testimonial)}
-                      disabled={processing}
-                      className={`p-2 rounded-lg transition-all ${
-                        testimonial.is_published
-                          ? 'bg-neon-green/10 text-neon-green hover:bg-neon-green/20'
-                          : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                      }`}
-                      title={testimonial.is_published ? 'Hide' : 'Publish'}
-                    >
-                      {testimonial.is_published ? (
-                        <Eye className="w-5 h-5" />
-                      ) : (
-                        <EyeOff className="w-5 h-5" />
-                      )}
-                    </button>
+                  {/* Title */}
+                  <h3 className="font-display font-bold text-lg text-white mb-2 line-clamp-1">
+                    "{testimonial.title}"
+                  </h3>
 
-                    <button
-                      onClick={() => handleToggleFeatured(testimonial)}
-                      disabled={processing}
-                      className={`p-2 rounded-lg transition-all ${
-                        testimonial.is_featured
-                          ? 'bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20'
-                          : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                      }`}
-                      title={testimonial.is_featured ? 'Remove Featured' : 'Set Featured'}
-                    >
-                      <Award className="w-5 h-5" />
-                    </button>
+                  {/* Content */}
+                  <p className="text-void-300 text-sm mb-4 line-clamp-2">
+                    {testimonial.content}
+                  </p>
 
-                    <button
-                      onClick={() => {
-                        setSelectedTestimonial(testimonial);
-                        setShowDeleteModal(true);
-                      }}
-                      className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                  {/* Author & Meta */}
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
+                    <span className="flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      {testimonial.client_name}
+                      {testimonial.client_company && ` @ ${testimonial.client_company}`}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-void-800/50 border border-void-700/50">
+                      {testimonial.project_name}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
+                    </span>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </>
+
+                {/* Actions */}
+                <div className="flex lg:flex-col items-center gap-2 lg:border-l lg:border-void-700/50 lg:pl-4">
+                  <button
+                    onClick={() => handleTogglePublished(testimonial)}
+                    disabled={processing}
+                    className={`p-2 rounded-lg transition-all ${
+                      testimonial.is_published
+                        ? 'bg-neon-green/10 text-neon-green hover:bg-neon-green/20'
+                        : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
+                    }`}
+                    title={testimonial.is_published ? 'Hide' : 'Publish'}
+                  >
+                    {testimonial.is_published ? (
+                      <Eye className="w-5 h-5" />
+                    ) : (
+                      <EyeOff className="w-5 h-5" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => handleToggleFeatured(testimonial)}
+                    disabled={processing}
+                    className={`p-2 rounded-lg transition-all ${
+                      testimonial.is_featured
+                        ? 'bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20'
+                        : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
+                    }`}
+                    title={testimonial.is_featured ? 'Remove Featured' : 'Set Featured'}
+                  >
+                    <Award className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSelectedTestimonial(testimonial);
+                      setShowDeleteModal(true);
+                    }}
+                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}
