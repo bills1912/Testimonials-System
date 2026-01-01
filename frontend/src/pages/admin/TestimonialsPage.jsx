@@ -199,38 +199,66 @@ const AdminTestimonialsPage = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-display font-bold text-2xl lg:text-3xl text-white mb-2">
+        <h1 className="font-display font-bold text-2xl lg:text-3xl mb-2" style={{ color: 'var(--text-primary)' }}>
           Testimonials
         </h1>
-        <p className="text-void-400">
+        <p style={{ color: 'var(--text-muted)' }}>
           Kelola semua testimoni klien Anda di sini.
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Testimoni', value: stats.total, color: 'text-white' },
-          { label: 'Published', value: stats.published, color: 'text-neon-green' },
-          { label: 'Featured', value: stats.featured, color: 'text-neon-cyan' },
-          { label: 'Avg. Rating', value: stats.avgRating, color: 'text-neon-yellow', icon: Star }
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="card-cyber p-4"
-          >
-            <div className="flex items-center gap-2">
-              <p className={`font-display font-bold text-2xl ${stat.color}`}>
-                {stat.value}
-              </p>
-              {stat.icon && <stat.icon className="w-5 h-5 fill-neon-yellow text-neon-yellow" />}
-            </div>
-            <p className="text-sm text-void-500">{stat.label}</p>
-          </motion.div>
-        ))}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: 'var(--text-primary)' }}>
+            {stats.total}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Total Testimoni</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: '#059669' }}>
+            {stats.published}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Published</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: '#0891b2' }}>
+            {stats.featured}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Featured</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card-cyber p-4"
+        >
+          <div className="flex items-center gap-2">
+            <p className="font-display font-bold text-2xl" style={{ color: '#d97706' }}>
+              {stats.avgRating}
+            </p>
+            <Star className="w-5 h-5" style={{ color: '#d97706', fill: '#d97706' }} />
+          </div>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Avg. Rating</p>
+        </motion.div>
       </div>
 
       {/* Filters */}
@@ -333,23 +361,23 @@ const AdminTestimonialsPage = () => {
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-display font-bold text-lg text-white mb-2 line-clamp-1">
+                  <h3 className="font-display font-bold text-lg mb-2 line-clamp-1" style={{ color: 'var(--text-primary)' }}>
                     "{testimonial.title}"
                   </h3>
 
                   {/* Content */}
-                  <p className="text-void-300 text-sm mb-4 line-clamp-2">
+                  <p className="text-sm mb-4 line-clamp-2" style={{ color: 'var(--text-tertiary)' }}>
                     {testimonial.content}
                   </p>
 
                   {/* Author & Meta */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
+                  <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
                     <span className="flex items-center gap-1">
                       <User className="w-3 h-3" />
                       {testimonial.client_name}
                       {testimonial.client_company && ` @ ${testimonial.client_company}`}
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-void-800/50 border border-void-700/50">
+                    <span className="px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)' }}>
                       {testimonial.project_name}
                     </span>
                     <span className="flex items-center gap-1">
@@ -360,15 +388,16 @@ const AdminTestimonialsPage = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex lg:flex-col items-center gap-2 lg:border-l lg:border-void-700/50 lg:pl-4">
+                <div className="flex lg:flex-col items-center gap-2 lg:pl-4 relative" style={{ borderLeft: 'none' }}>
+                  <div className="hidden lg:block absolute left-0 top-0 h-full" style={{ borderLeft: '1px solid var(--border-primary)' }}></div>
                   <button
                     onClick={() => handleTogglePublished(testimonial)}
                     disabled={processing}
-                    className={`p-2 rounded-lg transition-all ${
-                      testimonial.is_published
-                        ? 'bg-neon-green/10 text-neon-green hover:bg-neon-green/20'
-                        : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                    }`}
+                    className="p-2 rounded-lg transition-all"
+                    style={{
+                      backgroundColor: testimonial.is_published ? 'rgba(5, 150, 105, 0.15)' : 'var(--bg-tertiary)',
+                      color: testimonial.is_published ? 'var(--accent-green)' : 'var(--text-muted)'
+                    }}
                     title={testimonial.is_published ? 'Hide' : 'Publish'}
                   >
                     {testimonial.is_published ? (
@@ -381,11 +410,11 @@ const AdminTestimonialsPage = () => {
                   <button
                     onClick={() => handleToggleFeatured(testimonial)}
                     disabled={processing}
-                    className={`p-2 rounded-lg transition-all ${
-                      testimonial.is_featured
-                        ? 'bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20'
-                        : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                    }`}
+                    className="p-2 rounded-lg transition-all"
+                    style={{
+                      backgroundColor: testimonial.is_featured ? 'rgba(8, 145, 178, 0.15)' : 'var(--bg-tertiary)',
+                      color: testimonial.is_featured ? 'var(--accent-cyan)' : 'var(--text-muted)'
+                    }}
                     title={testimonial.is_featured ? 'Remove Featured' : 'Set Featured'}
                   >
                     <Award className="w-5 h-5" />
@@ -396,7 +425,11 @@ const AdminTestimonialsPage = () => {
                       setSelectedTestimonial(testimonial);
                       setShowDeleteModal(true);
                     }}
-                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                    className="p-2 rounded-lg transition-colors"
+                    style={{
+                      backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                      color: 'var(--accent-red)'
+                    }}
                     title="Delete"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -412,11 +445,11 @@ const AdminTestimonialsPage = () => {
           animate={{ opacity: 1 }}
           className="card-cyber p-12 text-center"
         >
-          <MessageSquare className="w-12 h-12 text-void-600 mx-auto mb-4" />
-          <h3 className="font-display font-bold text-xl text-white mb-2">
+          <MessageSquare className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+          <h3 className="font-display font-bold text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
             Tidak ada testimoni ditemukan
           </h3>
-          <p className="text-void-400">
+          <p style={{ color: 'var(--text-muted)' }}>
             {hasActiveFilters
               ? 'Coba ubah filter atau kata kunci pencarian'
               : 'Belum ada testimoni dari klien'}

@@ -25,6 +25,7 @@ html {
   --bg-tertiary: #2c2c2e;
   --bg-card: rgba(28, 28, 30, 0.8);
   --bg-input: rgba(28, 28, 30, 0.8);
+  --bg-code: rgba(28, 28, 30, 0.8);
   
   --text-primary: #f5f5f7;
   --text-secondary: #e5e5ea;
@@ -40,10 +41,16 @@ html {
   --accent-purple: #9d00ff;
   --accent-magenta: #ff00aa;
   --accent-yellow: #ffee00;
+  --accent-green: #00ff88;
+  --accent-red: #ff4757;
   
   --shadow-color: rgba(0, 0, 0, 0.5);
   --glow-cyan: rgba(0, 240, 255, 0.3);
   --glow-purple: rgba(157, 0, 255, 0.3);
+  
+  /* Stats card specific */
+  --stats-value: #f5f5f7;
+  --stats-label: #8e8e93;
 }
 
 html.light {
@@ -52,6 +59,7 @@ html.light {
   --bg-tertiary: #f1f5f9;
   --bg-card: #ffffff;
   --bg-input: #ffffff;
+  --bg-code: #e2e8f0;
   
   --text-primary: #0f172a;
   --text-secondary: #1e293b;
@@ -61,16 +69,22 @@ html.light {
   
   --border-primary: #e2e8f0;
   --border-secondary: #cbd5e1;
-  --border-light: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.08);
   
   --accent-cyan: #0891b2;
   --accent-purple: #7c3aed;
   --accent-magenta: #db2777;
-  --accent-yellow: #f59e0b;
+  --accent-yellow: #d97706;
+  --accent-green: #059669;
+  --accent-red: #dc2626;
   
   --shadow-color: rgba(0, 0, 0, 0.1);
-  --glow-cyan: rgba(8, 145, 178, 0.2);
-  --glow-purple: rgba(124, 58, 237, 0.2);
+  --glow-cyan: rgba(8, 145, 178, 0.15);
+  --glow-purple: rgba(124, 58, 237, 0.15);
+  
+  /* Stats card specific - more contrast in light mode */
+  --stats-value: #0f172a;
+  --stats-label: #475569;
 }
 
 body {
@@ -439,6 +453,114 @@ html.light .neon-text {
 }
 
 /* ============================================
+   SCROLLBAR STYLES
+   ============================================ */
+/* Dark mode scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-secondary) var(--bg-secondary);
+}
+
+/* Modal scrollbar - Dark mode */
+.modal-scroll-container::-webkit-scrollbar,
+.modal-content-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-scroll-container::-webkit-scrollbar-track,
+.modal-content-scroll::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.modal-scroll-container::-webkit-scrollbar-thumb,
+.modal-content-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+.modal-scroll-container::-webkit-scrollbar-thumb:hover,
+.modal-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Light mode specific scrollbar */
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.light .modal-scroll-container::-webkit-scrollbar-track,
+html.light .modal-content-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light .modal-scroll-container::-webkit-scrollbar-thumb,
+html.light .modal-content-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html.light .modal-scroll-container::-webkit-scrollbar-thumb:hover,
+html.light .modal-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Textarea scrollbar */
+textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+html.light textarea::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light textarea::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+/* Firefox scrollbar for light mode */
+html.light * {
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* ============================================
    THEME-AWARE COLOR CLASSES
    ============================================ */
 /* Text colors */
@@ -461,3 +583,245 @@ html.light .neon-text {
 .theme-accent-cyan { color: var(--accent-cyan); }
 .theme-accent-purple { color: var(--accent-purple); }
 .theme-accent-magenta { color: var(--accent-magenta); }
+
+/* ============================================
+   LIGHT MODE SPECIFIC OVERRIDES
+   ============================================ */
+
+/* Fix dark backgrounds in light mode */
+html.light .bg-void-800,
+html.light .bg-void-800\/50,
+html.light .bg-void-700,
+html.light .bg-void-700\/50,
+html.light .bg-void-900 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+html.light .bg-void-800\/80 {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+}
+
+/* Fix text colors in light mode */
+html.light .text-void-300,
+html.light .text-void-400 {
+  color: var(--text-tertiary) !important;
+}
+
+html.light .text-void-500,
+html.light .text-void-600 {
+  color: var(--text-muted) !important;
+}
+
+html.light .text-white {
+  color: var(--text-primary) !important;
+}
+
+/* Fix border colors in light mode */
+html.light .border-void-700,
+html.light .border-void-700\/50,
+html.light .border-void-600,
+html.light .border-void-800 {
+  border-color: var(--border-primary) !important;
+}
+
+/* Code blocks in light mode */
+html.light code,
+html.light .font-mono {
+  background-color: var(--bg-code) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Neon colors - stronger in light mode for better visibility */
+html.light .text-neon-cyan {
+  color: #0891b2 !important;
+  font-weight: 600;
+}
+
+html.light .text-neon-purple {
+  color: #7c3aed !important;
+  font-weight: 600;
+}
+
+html.light .text-neon-green {
+  color: #059669 !important;
+  font-weight: 600;
+}
+
+html.light .text-neon-yellow {
+  color: #d97706 !important;
+  font-weight: 600;
+}
+
+/* Badge backgrounds in light mode */
+html.light .bg-neon-cyan\/10 {
+  background-color: rgba(8, 145, 178, 0.15) !important;
+}
+
+html.light .bg-neon-purple\/10 {
+  background-color: rgba(124, 58, 237, 0.15) !important;
+}
+
+html.light .bg-neon-green\/10 {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+}
+
+html.light .bg-neon-yellow\/10 {
+  background-color: rgba(217, 119, 6, 0.15) !important;
+}
+
+html.light .bg-red-500\/10 {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+}
+
+/* Border neon colors in light mode */
+html.light .border-neon-cyan\/30 {
+  border-color: rgba(8, 145, 178, 0.4) !important;
+}
+
+html.light .border-neon-purple\/30,
+html.light .border-neon-purple\/20 {
+  border-color: rgba(124, 58, 237, 0.4) !important;
+}
+
+html.light .border-neon-green\/30 {
+  border-color: rgba(5, 150, 105, 0.4) !important;
+}
+
+/* Stats cards styling - ensure visibility */
+html.light .card-cyber p.font-display.font-bold {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+html.light .card-cyber p.text-sm {
+  color: var(--text-tertiary) !important;
+  font-weight: 500 !important;
+}
+
+/* Dashboard cards - stronger text */
+html.light .card-cyber h3 {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+html.light .card-cyber .text-2xl,
+html.light .card-cyber .text-3xl,
+html.light .card-cyber .text-4xl {
+  font-weight: 700 !important;
+}
+
+/* Token URL code block fix */
+html.light .bg-void-800\/50 code,
+html.light code.font-mono {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+/* Project card tags */
+html.light .px-2.py-1.text-xs.font-mono {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-tertiary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+/* Dropdown menu in light mode */
+html.light .bg-void-800 {
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .hover\:bg-void-700\/50:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Status badges */
+html.light .bg-neon-green\/10.text-neon-green {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+  color: #059669 !important;
+  font-weight: 600 !important;
+}
+
+html.light .bg-neon-cyan\/10.text-neon-cyan {
+  background-color: rgba(8, 145, 178, 0.15) !important;
+  color: #0891b2 !important;
+  font-weight: 600 !important;
+}
+
+html.light .bg-void-600\/10.text-void-400 {
+  background-color: rgba(100, 116, 139, 0.15) !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+html.light .bg-red-500\/10.text-red-400 {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+  color: #dc2626 !important;
+  font-weight: 600 !important;
+}
+
+/* Fix icon visibility in light mode */
+html.light .text-void-600 svg,
+html.light svg.text-void-600 {
+  color: var(--text-muted) !important;
+}
+
+/* Pagination buttons in light mode */
+html.light [style*="background-color: var(--bg-tertiary)"] {
+  background-color: #f1f5f9 !important;
+}
+
+/* Action buttons hover states */
+html.light .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+html.light .hover\:bg-void-600\/50:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Make sure all card content is visible */
+html.light .card-cyber * {
+  --tw-text-opacity: 1;
+}
+
+/* Fix project description text */
+html.light .line-clamp-2 {
+  color: var(--text-tertiary) !important;
+}
+
+/* Fix meta information text */
+html.light .text-xs.text-void-500 {
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+}
+
+/* Ensure select dropdown visibility */
+html.light select,
+html.light .cyber-select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+/* Fix textarea in light mode */
+html.light textarea.input-cyber {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Modal fixes for light mode */
+html.light .fixed.inset-0.bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ensure headings are visible */
+html.light h1, 
+html.light h2, 
+html.light h3 {
+  color: var(--text-primary);
+}
+
+/* Fix opacity issues */
+html.light .opacity-60 {
+  opacity: 0.7 !important;
+}

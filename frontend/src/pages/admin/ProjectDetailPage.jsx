@@ -95,17 +95,24 @@ const ProjectDetailPage = () => {
   if (loading) return <LoadingScreen />;
   if (!project) return null;
 
-  const statusColors = {
-    active: 'bg-neon-green/10 text-neon-green border-neon-green/30',
-    completed: 'bg-neon-cyan/10 text-neon-cyan border-neon-cyan/30',
-    archived: 'bg-void-600/10 text-void-400 border-void-600/30'
+  // Status colors with inline styles for light mode compatibility
+  const getStatusStyle = (status) => {
+    const styles = {
+      active: { backgroundColor: 'rgba(5, 150, 105, 0.15)', color: 'var(--accent-green)', borderColor: 'rgba(5, 150, 105, 0.3)' },
+      completed: { backgroundColor: 'rgba(8, 145, 178, 0.15)', color: 'var(--accent-cyan)', borderColor: 'rgba(8, 145, 178, 0.3)' },
+      archived: { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)', borderColor: 'var(--border-primary)' }
+    };
+    return styles[status] || styles.archived;
   };
 
-  const tokenStatusColors = {
-    active: 'bg-neon-green/10 text-neon-green',
-    used: 'bg-neon-cyan/10 text-neon-cyan',
-    expired: 'bg-void-600/10 text-void-400',
-    revoked: 'bg-red-500/10 text-red-400'
+  const getTokenStatusStyle = (status) => {
+    const styles = {
+      active: { backgroundColor: 'rgba(5, 150, 105, 0.15)', color: 'var(--accent-green)' },
+      used: { backgroundColor: 'rgba(8, 145, 178, 0.15)', color: 'var(--accent-cyan)' },
+      expired: { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' },
+      revoked: { backgroundColor: 'rgba(220, 38, 38, 0.15)', color: 'var(--accent-red)' }
+    };
+    return styles[status] || styles.expired;
   };
 
   return (
@@ -114,20 +121,24 @@ const ProjectDetailPage = () => {
       <div className="flex items-center gap-4">
         <Link
           to="/admin/projects"
-          className="p-2 rounded-lg bg-void-800/50 text-void-400 hover:text-white hover:bg-void-700/50 transition-colors"
+          className="p-2 rounded-lg transition-colors"
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="font-display font-bold text-2xl lg:text-3xl text-white">
+            <h1 className="font-display font-bold text-2xl lg:text-3xl" style={{ color: 'var(--text-primary)' }}>
               {project.name}
             </h1>
-            <span className={`px-2 py-1 text-xs rounded border ${statusColors[project.status]}`}>
+            <span 
+              className="px-2 py-1 text-xs rounded font-semibold"
+              style={{ ...getStatusStyle(project.status), border: '1px solid' }}
+            >
               {project.status}
             </span>
           </div>
-          <p className="text-void-400">Project Details</p>
+          <p style={{ color: 'var(--text-muted)' }}>Project Details</p>
         </div>
         <button
           onClick={() => setShowTokenModal(true)}
@@ -142,30 +153,34 @@ const ProjectDetailPage = () => {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Info */}
         <div className="lg:col-span-2 card-cyber p-6">
-          <h3 className="font-display font-bold text-lg text-white mb-4">
+          <h3 className="font-display font-bold text-lg mb-4" style={{ color: 'var(--text-primary)' }}>
             Project Information
           </h3>
           
           {project.description && (
-            <p className="text-void-300 mb-6">{project.description}</p>
+            <p className="mb-6" style={{ color: 'var(--text-tertiary)' }}>{project.description}</p>
           )}
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-void-500" />
+                <User className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                 <div>
-                  <p className="text-xs text-void-500">Client Name</p>
-                  <p className="text-white">{project.client_name}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Client Name</p>
+                  <p style={{ color: 'var(--text-primary)' }}>{project.client_name}</p>
                 </div>
               </div>
               
               {project.client_email && (
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-void-500" />
+                  <Mail className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <div>
-                    <p className="text-xs text-void-500">Client Email</p>
-                    <a href={`mailto:${project.client_email}`} className="text-neon-cyan hover:text-neon-purple transition-colors">
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Client Email</p>
+                    <a 
+                      href={`mailto:${project.client_email}`} 
+                      className="transition-colors font-medium"
+                      style={{ color: 'var(--accent-cyan)' }}
+                    >
                       {project.client_email}
                     </a>
                   </div>
@@ -174,10 +189,10 @@ const ProjectDetailPage = () => {
               
               {project.client_company && (
                 <div className="flex items-center gap-3">
-                  <Building2 className="w-5 h-5 text-void-500" />
+                  <Building2 className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <div>
-                    <p className="text-xs text-void-500">Company</p>
-                    <p className="text-white">{project.client_company}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Company</p>
+                    <p style={{ color: 'var(--text-primary)' }}>{project.client_company}</p>
                   </div>
                 </div>
               )}
@@ -186,14 +201,15 @@ const ProjectDetailPage = () => {
             <div className="space-y-4">
               {project.project_url && (
                 <div className="flex items-center gap-3">
-                  <ExternalLink className="w-5 h-5 text-void-500" />
+                  <ExternalLink className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <div>
-                    <p className="text-xs text-void-500">Project URL</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Project URL</p>
                     <a
                       href={project.project_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-neon-cyan hover:text-neon-purple transition-colors"
+                      className="transition-colors font-medium"
+                      style={{ color: 'var(--accent-cyan)' }}
                     >
                       {project.project_url}
                     </a>
@@ -202,10 +218,10 @@ const ProjectDetailPage = () => {
               )}
               
               <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-void-500" />
+                <Calendar className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                 <div>
-                  <p className="text-xs text-void-500">Created</p>
-                  <p className="text-white">
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Created</p>
+                  <p style={{ color: 'var(--text-primary)' }}>
                     {format(new Date(project.created_at), 'dd MMMM yyyy')}
                   </p>
                 </div>
@@ -215,16 +231,21 @@ const ProjectDetailPage = () => {
 
           {/* Tags */}
           {project.tags?.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-void-700/50">
+            <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-primary)' }}>
               <div className="flex items-center gap-2 mb-3">
-                <Tag className="w-4 h-4 text-void-500" />
-                <p className="text-sm text-void-400">Tags</p>
+                <Tag className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Tags</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag, i) => (
+                {project.tags.map((tag, index) => (
                   <span
-                    key={i}
-                    className="px-3 py-1 text-sm bg-void-800/50 text-void-300 rounded-full border border-void-700/50"
+                    key={index}
+                    className="px-3 py-1 text-sm font-mono rounded-lg"
+                    style={{ 
+                      backgroundColor: 'var(--bg-tertiary)', 
+                      color: 'var(--text-tertiary)',
+                      border: '1px solid var(--border-primary)'
+                    }}
                   >
                     {tag}
                   </span>
@@ -238,28 +259,28 @@ const ProjectDetailPage = () => {
         <div className="space-y-4">
           <div className="card-cyber p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-neon-purple/10">
-                <MessageSquare className="w-5 h-5 text-neon-purple" />
+              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(124, 58, 237, 0.15)' }}>
+                <MessageSquare className="w-5 h-5" style={{ color: 'var(--accent-purple)' }} />
               </div>
               <div>
-                <p className="text-2xl font-display font-bold text-white">
+                <p className="text-2xl font-display font-bold" style={{ color: 'var(--text-primary)' }}>
                   {testimonials.length}
                 </p>
-                <p className="text-sm text-void-400">Testimonials</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Testimonials</p>
               </div>
             </div>
           </div>
 
           <div className="card-cyber p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-neon-green/10">
-                <Key className="w-5 h-5 text-neon-green" />
+              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(5, 150, 105, 0.15)' }}>
+                <Key className="w-5 h-5" style={{ color: 'var(--accent-green)' }} />
               </div>
               <div>
-                <p className="text-2xl font-display font-bold text-white">
+                <p className="text-2xl font-display font-bold" style={{ color: 'var(--text-primary)' }}>
                   {tokens.filter(t => t.status === 'active').length}
                 </p>
-                <p className="text-sm text-void-400">Active Tokens</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Active Tokens</p>
               </div>
             </div>
           </div>
@@ -269,7 +290,7 @@ const ProjectDetailPage = () => {
       {/* Invite Tokens */}
       <div className="card-cyber p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-display font-bold text-lg text-white">
+          <h3 className="font-display font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
             Invite Tokens
           </h3>
           <button
@@ -288,34 +309,45 @@ const ProjectDetailPage = () => {
                 key={token.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="p-4 rounded-xl bg-void-800/30 border border-void-700/50"
+                className="p-4 rounded-xl"
+                style={{ 
+                  backgroundColor: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-primary)' 
+                }}
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2 py-1 text-xs rounded ${tokenStatusColors[token.status]}`}>
+                      <span 
+                        className="px-2 py-1 text-xs rounded font-semibold"
+                        style={getTokenStatusStyle(token.status)}
+                      >
                         {token.status}
                       </span>
                       {token.note && (
-                        <span className="text-sm text-void-400 truncate">
+                        <span className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>
                           {token.note}
                         </span>
                       )}
                     </div>
-                    <p className="font-mono text-sm text-void-300 truncate">
+                    <p 
+                      className="font-mono text-sm truncate"
+                      style={{ color: 'var(--text-tertiary)' }}
+                    >
                       {token.invite_url}
                     </p>
-                    <p className="text-xs text-void-500 mt-1">
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
                       Expires: {format(new Date(token.expires_at), 'dd MMM yyyy HH:mm')}
                     </p>
                   </div>
                   <button
                     onClick={() => copyToClipboard(token.invite_url, token.id)}
-                    className={`p-2 rounded-lg transition-all ${
-                      copiedToken === token.id
-                        ? 'bg-neon-green/10 text-neon-green'
-                        : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                    }`}
+                    className="p-2 rounded-lg transition-all"
+                    style={{
+                      backgroundColor: copiedToken === token.id ? 'rgba(5, 150, 105, 0.15)' : 'var(--bg-secondary)',
+                      color: copiedToken === token.id ? 'var(--accent-green)' : 'var(--text-muted)',
+                      border: '1px solid var(--border-primary)'
+                    }}
                   >
                     {copiedToken === token.id ? (
                       <CheckCircle className="w-5 h-5" />
@@ -329,8 +361,8 @@ const ProjectDetailPage = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <Key className="w-12 h-12 text-void-600 mx-auto mb-4" />
-            <p className="text-void-400 mb-4">Belum ada token untuk proyek ini</p>
+            <Key className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+            <p className="mb-4" style={{ color: 'var(--text-muted)' }}>Belum ada token untuk proyek ini</p>
             <button
               onClick={() => setShowTokenModal(true)}
               className="btn-primary inline-flex items-center gap-2"
@@ -344,7 +376,7 @@ const ProjectDetailPage = () => {
 
       {/* Testimonials */}
       <div className="card-cyber p-6">
-        <h3 className="font-display font-bold text-lg text-white mb-6">
+        <h3 className="font-display font-bold text-lg mb-6" style={{ color: 'var(--text-primary)' }}>
           Testimonials ({testimonials.length})
         </h3>
 
@@ -353,12 +385,18 @@ const ProjectDetailPage = () => {
             {testimonials.map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="p-4 rounded-xl bg-void-800/30 border border-void-700/50"
+                className="p-4 rounded-xl"
+                style={{ 
+                  backgroundColor: 'var(--bg-tertiary)', 
+                  border: '1px solid var(--border-primary)' 
+                }}
               >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <h4 className="font-semibold text-white">{testimonial.client_name}</h4>
-                    <p className="text-sm text-void-500">
+                    <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {testimonial.client_name}
+                    </h4>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                       {testimonial.client_role}
                       {testimonial.client_role && testimonial.client_company && ' @ '}
                       {testimonial.client_company}
@@ -366,9 +404,13 @@ const ProjectDetailPage = () => {
                   </div>
                   <StarRating rating={testimonial.rating} size="sm" />
                 </div>
-                <h5 className="font-medium text-void-200 mb-2">"{testimonial.title}"</h5>
-                <p className="text-void-400 text-sm line-clamp-3">{testimonial.content}</p>
-                <p className="text-xs text-void-500 mt-3">
+                <h5 className="font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  "{testimonial.title}"
+                </h5>
+                <p className="text-sm line-clamp-3" style={{ color: 'var(--text-tertiary)' }}>
+                  {testimonial.content}
+                </p>
+                <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>
                   {format(new Date(testimonial.created_at), 'dd MMM yyyy')}
                 </p>
               </div>
@@ -376,8 +418,8 @@ const ProjectDetailPage = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <MessageSquare className="w-12 h-12 text-void-600 mx-auto mb-4" />
-            <p className="text-void-400">Belum ada testimoni untuk proyek ini</p>
+            <MessageSquare className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+            <p style={{ color: 'var(--text-muted)' }}>Belum ada testimoni untuk proyek ini</p>
           </div>
         )}
       </div>
@@ -390,7 +432,7 @@ const ProjectDetailPage = () => {
       >
         <form onSubmit={generateToken} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-void-300 mb-2">
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-tertiary)' }}>
               Valid For
             </label>
             <select
@@ -408,7 +450,7 @@ const ProjectDetailPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-void-300 mb-2">
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-tertiary)' }}>
               Note (Optional)
             </label>
             <input
@@ -420,9 +462,15 @@ const ProjectDetailPage = () => {
             />
           </div>
 
-          <div className="p-4 rounded-lg bg-void-800/50 border border-void-700/50">
-            <p className="text-sm text-void-400">
-              Token ini hanya bisa digunakan <strong className="text-white">satu kali</strong>.
+          <div 
+            className="p-4 rounded-lg"
+            style={{ 
+              backgroundColor: 'var(--bg-tertiary)', 
+              border: '1px solid var(--border-primary)' 
+            }}
+          >
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              Token ini hanya bisa digunakan <strong style={{ color: 'var(--text-primary)' }}>satu kali</strong>.
               Setelah klien mengirim testimoni, token akan otomatis hangus.
             </p>
           </div>

@@ -200,10 +200,10 @@ const TokensPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display font-bold text-2xl lg:text-3xl text-white mb-2">
+          <h1 className="font-display font-bold text-2xl lg:text-3xl mb-2" style={{ color: 'var(--text-primary)' }}>
             Invite Tokens
           </h1>
-          <p className="text-void-400">
+          <p style={{ color: 'var(--text-muted)' }}>
             Kelola token undangan untuk klien Anda.
           </p>
         </div>
@@ -219,25 +219,53 @@ const TokensPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Tokens', value: stats.total, color: 'text-white' },
-          { label: 'Active', value: stats.active, color: 'text-neon-green' },
-          { label: 'Used', value: stats.used, color: 'text-neon-cyan' },
-          { label: 'Expired', value: stats.expired, color: 'text-void-400' }
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="card-cyber p-4"
-          >
-            <p className={`font-display font-bold text-2xl ${stat.color}`}>
-              {stat.value}
-            </p>
-            <p className="text-sm text-void-500">{stat.label}</p>
-          </motion.div>
-        ))}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: 'var(--text-primary)' }}>
+            {stats.total}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Total Tokens</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: '#059669' }}>
+            {stats.active}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Active</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: '#0891b2' }}>
+            {stats.used}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Used</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card-cyber p-4"
+        >
+          <p className="font-display font-bold text-2xl" style={{ color: '#64748b' }}>
+            {stats.expired}
+          </p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Expired</p>
+        </motion.div>
       </div>
 
       {/* Filters */}
@@ -309,22 +337,22 @@ const TokensPage = () => {
                         <StatusIcon className="w-3 h-3" />
                         {status.label}
                       </span>
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                         {token.project_name}
                       </span>
                     </div>
                     
                     <div className="flex items-center gap-2 mb-2">
-                      <code className="flex-1 font-mono text-sm text-void-300 bg-void-800/50 px-3 py-2 rounded-lg truncate">
+                      <code className="flex-1 font-mono text-sm px-3 py-2 rounded-lg truncate" style={{ backgroundColor: 'var(--bg-code)', color: 'var(--text-primary)' }}>
                         {token.invite_url}
                       </code>
                       <button
                         onClick={() => copyToClipboard(token.invite_url, token.id)}
-                        className={`p-2 rounded-lg transition-all flex-shrink-0 ${
-                          copiedToken === token.id
-                            ? 'bg-neon-green/10 text-neon-green'
-                            : 'bg-void-700/50 text-void-400 hover:text-white hover:bg-void-600/50'
-                        }`}
+                        className="p-2 rounded-lg transition-all flex-shrink-0"
+                        style={{
+                          backgroundColor: copiedToken === token.id ? 'rgba(5, 150, 105, 0.15)' : 'var(--bg-tertiary)',
+                          color: copiedToken === token.id ? 'var(--accent-green)' : 'var(--text-muted)'
+                        }}
                       >
                         {copiedToken === token.id ? (
                           <CheckCircle className="w-5 h-5" />
@@ -334,7 +362,7 @@ const TokensPage = () => {
                       </button>
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-void-500">
+                    <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
                       <span>
                         Created: {format(new Date(token.created_at), 'dd MMM yyyy HH:mm')}
                       </span>
@@ -342,12 +370,12 @@ const TokensPage = () => {
                         Expires: {format(new Date(token.expires_at), 'dd MMM yyyy HH:mm')}
                       </span>
                       {token.used_at && (
-                        <span className="text-neon-cyan">
+                        <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>
                           Used: {format(new Date(token.used_at), 'dd MMM yyyy HH:mm')}
                         </span>
                       )}
                       {token.note && (
-                        <span className="text-void-400">
+                        <span style={{ color: 'var(--text-tertiary)' }}>
                           Note: {token.note}
                         </span>
                       )}
@@ -362,7 +390,11 @@ const TokensPage = () => {
                           href={`https://wa.me/?text=${encodeURIComponent(`Silakan berikan testimoni Anda melalui link berikut: ${token.invite_url}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 rounded-lg bg-neon-green/10 text-neon-green hover:bg-neon-green/20 transition-colors"
+                          className="p-2 rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: 'rgba(5, 150, 105, 0.15)',
+                            color: 'var(--accent-green)'
+                          }}
                           title="Share via WhatsApp"
                         >
                           <Send className="w-5 h-5" />
@@ -372,7 +404,11 @@ const TokensPage = () => {
                             setSelectedToken(token);
                             setShowRevokeModal(true);
                           }}
-                          className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                          className="p-2 rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                            color: 'var(--accent-red)'
+                          }}
                           title="Revoke Token"
                         >
                           <Trash2 className="w-5 h-5" />
@@ -387,13 +423,13 @@ const TokensPage = () => {
         </div>
       ) : (
         <div className="card-cyber p-12 text-center">
-          <Key className="w-12 h-12 text-void-600 mx-auto mb-4" />
-          <h3 className="font-display font-bold text-xl text-white mb-2">
+          <Key className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+          <h3 className="font-display font-bold text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
             {hasActiveFilters
               ? 'Tidak ada token ditemukan'
               : 'Belum ada token'}
           </h3>
-          <p className="text-void-400 mb-6">
+          <p className="mb-6" style={{ color: 'var(--text-muted)' }}>
             {hasActiveFilters
               ? 'Coba kata kunci atau filter lain'
               : projects.length > 0

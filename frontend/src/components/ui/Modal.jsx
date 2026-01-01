@@ -43,6 +43,14 @@ const Modal = ({
 
   if (!isOpen) return null;
 
+  // Scrollbar styles based on theme
+  const scrollbarStyle = {
+    scrollbarWidth: 'thin',
+    scrollbarColor: isLightMode 
+      ? '#cbd5e1 #f1f5f9' 
+      : '#48484a #2c2c2e'
+  };
+
   return createPortal(
     <AnimatePresence>
       {isOpen && (
@@ -71,13 +79,15 @@ const Modal = ({
           
           {/* Modal Container with scroll */}
           <div 
-            className="absolute inset-0 overflow-y-auto"
+            className="absolute inset-0 modal-scroll-container"
             style={{ 
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '2rem 1rem',
-              minHeight: '100%'
+              minHeight: '100%',
+              overflowY: 'auto',
+              ...scrollbarStyle
             }}
           >
             {/* Modal Content */}
@@ -142,8 +152,12 @@ const Modal = ({
               
               {/* Content */}
               <div 
-                className="relative p-6 overflow-y-auto"
-                style={{ maxHeight: '70vh' }}
+                className="relative p-6 modal-content-scroll"
+                style={{ 
+                  maxHeight: '70vh',
+                  overflowY: 'auto',
+                  ...scrollbarStyle
+                }}
               >
                 {children}
               </div>
